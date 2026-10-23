@@ -17,6 +17,7 @@
 #include "TokenBoundary.h"
 #include "hyphenation/HyphenationCommon.h"
 #include "hyphenation/Hyphenator.h"
+#include "thai/ThaiWordBreak.h"
 
 constexpr int MAX_COST = std::numeric_limits<int>::max();
 
@@ -218,6 +219,12 @@ std::vector<size_t> cjkCharacterBreakByteOffsets(const std::string& text) {
     allowedOffsets.push_back(codepoints[i].endOffset);
   }
   return allowedOffsets;
+}
+
+// Gap-less break points inside a space-free word: between CJK characters, or between Thai words.
+std::vector<size_t> gaplessBreakByteOffsets(const std::string& text) {
+  auto offsets = cjkCharacterBreakByteOffsets(text);
+  return offsets.empty() ? ThaiWordBreak::breakByteOffsets(text) : offsets;
 }
 
 int computeJustifyExtra(const int spareSpace, const size_t gapCount) {
@@ -519,7 +526,7 @@ void ParsedText::addWord(std::string word, const EpdFontFamily::Style fontStyle,
     wordVisibleOffsetDeltas.reserve(newCapacity);
   };
 
-  if (auto breakOffsets = cjkCharacterBreakByteOffsets(word); !breakOffsets.empty()) {
+  if (auto breakOffsets = gaplessBreakByteOffsets(word); !breakOffsets.empty()) {
     // CJK-heavy paragraphs can push hundreds of tiny tokens quickly when CSS toggles
     // inline styles. Reserve once up front to avoid repeated vector growth reallocations.
     ensureTokenCapacity(breakOffsets.size() + 1);
