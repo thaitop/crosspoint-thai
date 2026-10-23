@@ -19,6 +19,7 @@ void EpdFont::getTextBounds(const char* string, const int startX, const int star
   int lastBaseLeft = 0;
   int lastBaseWidth = 0;
   int lastBaseTop = 0;
+  int thaiMarkTop = 0;        // top of the Thai above-base mark stack (see thaiMark)
   int32_t prevAdvanceFP = 0;  // 12.4 fixed-point: prev glyph's advance + next kern for snap
   uint32_t cp;
   uint32_t prevCp = 0;
@@ -45,7 +46,19 @@ void EpdFont::getTextBounds(const char* string, const int startX, const int star
     }
 
     const combiningMark::Anchor anchor = combiningMark::anchorFor(cp);
-    const int raiseBy = isCombining ? combiningMark::raiseAboveBase(anchor, glyph->top, glyph->height, lastBaseTop) : 0;
+    int raiseBy = isCombining ? combiningMark::raiseAboveBase(anchor, glyph->top, glyph->height, lastBaseTop) : 0;
+    if (!isCombining && thaiMark::isAbove(cp)) {
+      int belowTop = thaiMarkTop;
+      const char* next = string;
+      if (thaiMark::isTone(cp) && utf8NextCodepoint(reinterpret_cast<const uint8_t**>(&next)) == thaiMark::SARA_AM) {
+        const EpdGlyph* saraAm = getGlyph(thaiMark::SARA_AM);
+        if (saraAm) belowTop = std::max(belowTop, static_cast<int>(saraAm->top));
+      }
+      raiseBy = thaiMark::raiseOver(glyph->top, glyph->height, belowTop);
+      thaiMarkTop = glyph->top + raiseBy;
+    } else if (!isCombining) {
+      thaiMarkTop = 0;
+    }
 
     if (!isCombining && prevCp != 0) {
       const auto kernFP = getKerning(prevCp, cp);  // 4.4 fixed-point kern

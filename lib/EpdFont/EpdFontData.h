@@ -108,6 +108,31 @@ constexpr int raiseAboveBase(const Anchor anchor, const int markTop, const int m
 
 }  // namespace combiningMark
 
+/// Thai fonts place every above-base mark at one height and rely on GPOS to
+/// lift a tone mark over an upper vowel (or SARA AM's nikhahit). Without GPOS
+/// the marks overlap, so stack each mark above the one drawn before it.
+namespace thaiMark {
+
+constexpr uint32_t SARA_AM = 0x0E33;
+
+/// MAI HAN-AKAT, upper vowels SARA I..SARA UEE, and MAITAIKHU..YAMAKKAN.
+constexpr bool isAbove(const uint32_t cp) {
+  return cp == 0x0E31 || (cp >= 0x0E34 && cp <= 0x0E37) || (cp >= 0x0E47 && cp <= 0x0E4E);
+}
+
+/// Tone marks and THANTHAKHAT: the marks that must clear SARA AM's nikhahit.
+constexpr bool isTone(const uint32_t cp) { return cp >= 0x0E48 && cp <= 0x0E4C; }
+
+/// Pixels to raise an above-base mark so it clears the mark below it, whose
+/// top is `belowTop` (0 when there is none).
+constexpr int raiseOver(const int markTop, const int markHeight, const int belowTop) {
+  return belowTop > 0
+             ? combiningMark::raiseAboveBase(combiningMark::Anchor::CenterRaised, markTop, markHeight, belowTop)
+             : 0;
+}
+
+}  // namespace thaiMark
+
 /// GCC/Clang (the ESP32 firmware toolchain) pack structs with __attribute__((packed)).
 /// MSVC (host unit tests) has no equivalent attribute and instead needs a #pragma pack
 /// region achieving the same 1-byte alignment. These macros keep the on-disk font layout

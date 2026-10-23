@@ -71,3 +71,29 @@ TEST(RaiseAboveBase, CentreRaisedBehaviourUnchanged) {
   // Below-baseline mark (kasra, cedilla): stays at font-native position.
   EXPECT_EQ(raiseAboveBase(Anchor::CenterRaised, 2, 4, 12), 0);
 }
+
+// ============================================================================
+// Thai above-base marks share one font-native height; each mark is stacked
+// over the mark drawn before it in the same cluster.
+// ============================================================================
+
+TEST(ThaiMark, AboveAndToneClassification) {
+  EXPECT_TRUE(thaiMark::isAbove(0x0E31));   // mai han-akat
+  EXPECT_TRUE(thaiMark::isAbove(0x0E37));   // sara uee
+  EXPECT_TRUE(thaiMark::isAbove(0x0E49));   // mai tho
+  EXPECT_FALSE(thaiMark::isAbove(0x0E33));  // sara am (spacing)
+  EXPECT_FALSE(thaiMark::isAbove(0x0E38));  // sara u (below)
+  EXPECT_TRUE(thaiMark::isTone(0x0E48));    // mai ek
+  EXPECT_TRUE(thaiMark::isTone(0x0E4C));    // thanthakhat
+  EXPECT_FALSE(thaiMark::isTone(0x0E34));   // sara i
+}
+
+TEST(ThaiMark, RaiseOverMarkBelow) {
+  // Tone mark spanning [14, 18] over a sara i whose top is 17: lift so its
+  // bottom sits MIN_GAP_PX above 17.
+  EXPECT_EQ(thaiMark::raiseOver(18, 4, 17), 17 + combiningMark::MIN_GAP_PX - 14);
+  // No mark below: keep the font-native height.
+  EXPECT_EQ(thaiMark::raiseOver(18, 4, 0), 0);
+  // Already clear of the mark below.
+  EXPECT_EQ(thaiMark::raiseOver(24, 4, 17), 0);
+}
