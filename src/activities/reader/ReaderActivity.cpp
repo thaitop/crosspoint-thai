@@ -15,6 +15,7 @@
 #include "CrossPointState.h"
 #include "EpubReaderActivity.h"
 #include "ReaderUtils.h"
+#include "ReadingLogStore.h"
 #include "RecentBooksStore.h"
 #include "SdCardFontSystem.h"
 #include "XtcReaderActivity.h"
@@ -84,6 +85,15 @@ void ReaderActivity::onEnter() {
   requestUpdate();
 }
 
+void ReaderActivity::creditReadingTime() {
+  // Five minutes covers a slow page; longer gaps are an idle device.
+  constexpr unsigned long MAX_PAGE_GAP_MS = 5UL * 60 * 1000;
+  const unsigned long now = millis();
+  // Time before the first page is book loading, not reading.
+  if (pageRendered.load(std::memory_order_acquire)) readingMs += std::min(now - readingTickMs, MAX_PAGE_GAP_MS);
+  readingTickMs = now;
+}
+
 void ReaderActivity::rememberBookOnceRendered() {
   if (bookRemembered || !pageRendered.load(std::memory_order_acquire)) return;
   bookRemembered = true;
@@ -96,6 +106,9 @@ void ReaderActivity::rememberBookOnceRendered() {
 
 void ReaderActivity::onExit() {
   Activity::onExit();
+
+  creditReadingTime();
+  READING_LOG.addReading(readingMs / 1000);
 
   // Keep rebuildable font buffers from pinning the heap between reading sessions.
   if (auto* fontCache = renderer.getFontCacheManager()) {
@@ -244,6 +257,7 @@ void ReaderActivity::loop() {
 }
 
 void ReaderActivity::render(RenderLock&&) {
+  creditReadingTime();
   if (isAtEndOfBook()) {
     if (!endOfBookOptions) {
       endOfBookOptions = makeUniqueNoThrow<EndOfBookOptions>(renderer);
