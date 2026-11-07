@@ -73,3 +73,9 @@ TEST(ThaiWordBreak, MixedLatinThaiKeepsLatinWhole) {
   // Breaks fall only between Thai words, never inside "iPhone".
   EXPECT_EQ(segmented("iPhoneรุ่นใหม่"), "iPhoneรุ่น|ใหม่");
 }
+
+TEST(ThaiWordBreak, ClusterStartInsideToneAndVowelStack) {
+  // ก ี ่ are three bytes each; any offset inside the cluster backs off to 0.
+  EXPECT_EQ(ThaiWordBreak::clusterStart("กี่", 4), 0u);
+  EXPECT_EQ(ThaiWordBreak::clusterStart("กี่คน", 9), 9u);
+}
