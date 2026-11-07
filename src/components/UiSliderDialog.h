@@ -1,6 +1,7 @@
 #pragma once
 #include <GfxRenderer.h>
 #include <I18n.h>
+#include <Utf8.h>
 
 #include <algorithm>
 
@@ -37,15 +38,34 @@ struct UiSliderDialogSpec {
   const char* hintLine2 = nullptr;
 };
 
+// True when `fontId` can draw every non-ASCII codepoint of `text`.
+inline bool fontCoversText(const GfxRenderer& renderer, const int fontId, const char* text,
+                           const EpdFontFamily::Style style) {
+  const auto& fonts = renderer.getFontMap();
+  const auto it = fonts.find(fontId);
+  if (it == fonts.end()) return false;
+  if (text == nullptr) return true;
+  const auto* cursor = reinterpret_cast<const unsigned char*>(text);
+  uint32_t cp;
+  while ((cp = utf8NextCodepoint(&cursor))) {
+    if (cp >= 0x80 && !it->second.hasCodepoint(cp, style)) return false;
+  }
+  return true;
+}
+
 inline void buildSliderDialogScreen(UiAppHost::UiScreen& screen, freeink::ui::GfxRendererTarget& uiTarget,
-                                    const MappedInputManager& mappedInput, const UiSliderDialogSpec& spec) {
+                                    const GfxRenderer& renderer, const MappedInputManager& mappedInput,
+                                    const UiSliderDialogSpec& spec) {
   namespace fui = freeink::ui;
   const auto& metrics = UITheme::getInstance().getMetrics();
   const auto& theme = screen.theme();
 
   // The readout is the dialog's hero: remap the title slot to the large sans
-  // so it reads at a glance.
-  uiTarget.setFont(fui::GfxRendererTarget::FONT_TITLE, NOTOSANS_18_FONT_ID);
+  // so it reads at a glance. The large sans has no Thai or other UI-only
+  // scripts, so readouts it cannot draw keep the theme's title font.
+  if (fontCoversText(renderer, NOTOSANS_18_FONT_ID, spec.readout, EpdFontFamily::BOLD)) {
+    uiTarget.setFont(fui::GfxRendererTarget::FONT_TITLE, NOTOSANS_18_FONT_ID);
+  }
 
   const bool touch = mappedInput.hasTouch();
   // Touch boards get the finger-sized pill (same as the frontlight rows); on
