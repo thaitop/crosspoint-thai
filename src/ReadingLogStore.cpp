@@ -75,6 +75,20 @@ void ReadingLogStore::addReading(const uint32_t seconds) {
   if (seconds == 0 || !localDate(now)) return;
   const int32_t today = dayNumber(now);
 
+  const int32_t key = monthKeyOf(now);
+  if (monthKey != key) {
+    monthKey = key;
+    monthSeconds.fill(0);
+  }
+  // The month log must hold every week-log day of this month before the
+  // rotation below can drop one. Older files have such days only in the week log.
+  const int32_t firstOfMonth = today - (now.tm_mday - 1);
+  for (const auto& entry : days) {
+    if (entry.day < firstOfMonth || entry.day > today) continue;
+    uint32_t& logged = monthSeconds[entry.day - firstOfMonth];
+    logged = std::max(logged, entry.seconds);
+  }
+
   if (days[0].day != today) {
     std::rotate(days.rbegin(), days.rbegin() + 1, days.rend());
     days[0] = Day{today, 0};
@@ -84,11 +98,6 @@ void ReadingLogStore::addReading(const uint32_t seconds) {
   if (before < READING_DAY_SECONDS && days[0].seconds >= READING_DAY_SECONDS && streakEnd != today) {
     streakDays = streakEnd == today - 1 ? streakDays + 1 : 1;
     streakEnd = today;
-  }
-  const int32_t key = monthKeyOf(now);
-  if (monthKey != key) {
-    monthKey = key;
-    monthSeconds.fill(0);
   }
   monthSeconds[now.tm_mday - 1] += seconds;
   if (!saveToFile()) LOG_ERR("RLS", "Failed to save reading log");
