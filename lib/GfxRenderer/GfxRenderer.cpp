@@ -90,6 +90,38 @@ void appendShapedRtlTokens(const char* text, std::string& shapedOut) {
     }
   }
 }
+
+// Running Thai mark placement for one line (see thaiMark).
+struct ThaiMarkState {
+  int stackTop = 0;   // top of the above-base mark stack
+  int baseShift = 0;  // left shift for above-base marks over the current base
+};
+
+struct ThaiMarkOffset {
+  int raise = 0;
+  int shiftLeft = 0;
+};
+
+// Offset for a Thai above-base mark. `next` points past `cp`: a tone mark
+// typed before SARA AM must also clear its nikhahit.
+ThaiMarkOffset thaiMarkOffset(const EpdFontFamily& font, const uint32_t cp, const EpdGlyph* glyph, const char* next,
+                              const EpdFontFamily::Style style, ThaiMarkState& state) {
+  if (!glyph || !thaiMark::isAbove(cp)) {
+    state.stackTop = 0;
+    if (!thaiMark::isBelow(cp)) {
+      state.baseShift = glyph && thaiMark::hasTallAscender(cp) ? thaiMark::tallAscenderShift(glyph->top) : 0;
+    }
+    return {};
+  }
+  int belowTop = state.stackTop;
+  if (thaiMark::isTone(cp) && utf8NextCodepoint(reinterpret_cast<const uint8_t**>(&next)) == thaiMark::SARA_AM) {
+    const EpdGlyph* saraAm = font.getGlyph(thaiMark::SARA_AM, style);
+    if (saraAm) belowTop = std::max(belowTop, static_cast<int>(saraAm->top));
+  }
+  const int raiseBy = thaiMark::raiseOver(glyph->top, glyph->height, belowTop);
+  state.stackTop = glyph->top + raiseBy;
+  return {raiseBy, state.baseShift};
+}
 }  // namespace
 
 const uint8_t* GfxRenderer::getGlyphBitmap(const EpdFontData* fontData, const EpdGlyph* glyph) const {
@@ -1076,6 +1108,7 @@ void GfxRenderer::drawText(const int fontId, const int x, const int y, const cha
   int lastBaseLeft = 0;
   int lastBaseWidth = 0;
   int lastBaseTop = 0;
+  ThaiMarkState thaiMarks;
   int32_t prevAdvanceFP = 0;  // 12.4 fixed-point: prev glyph's advance + next kern for snap
 
   if (fontCacheManager_ && fontCacheManager_->isScanning()) {
@@ -1144,6 +1177,7 @@ void GfxRenderer::drawText(const int fontId, const int x, const int y, const cha
     lastBaseWidth = glyph ? glyph->width : 0;
     lastBaseTop = glyph ? glyph->top : 0;
     prevAdvanceFP = glyph ? glyph->advanceX : 0;  // 12.4 fixed-point
+    const ThaiMarkOffset thai = thaiMarkOffset(font, cp, glyph, textCursor, style, thaiMarks);
 
     const bool isSupSub = (style & (EpdFontFamily::SUP | EpdFontFamily::SUB)) != 0;
     if (isSupSub) {
@@ -1161,7 +1195,8 @@ void GfxRenderer::drawText(const int fontId, const int x, const int y, const cha
       renderCharScaled(*this, renderMode, font, cp, lastBaseX, yPos, black, style, SMALL_CAPS_SCALE_NUM,
                        SMALL_CAPS_SCALE_DEN);
     } else {
-      renderCharImpl<TextRotation::None>(*this, renderMode, font, cp, lastBaseX, yPos, black, style);
+      renderCharImpl<TextRotation::None>(*this, renderMode, font, cp, lastBaseX - thai.shiftLeft, yPos - thai.raise,
+                                         black, style);
     }
     prevCp = cp;
   }
@@ -3119,6 +3154,7 @@ void GfxRenderer::drawTextRotated90CW(const int fontId, const int x, const int y
   int lastBaseLeft = 0;
   int lastBaseWidth = 0;
   int lastBaseTop = 0;
+  ThaiMarkState thaiMarks;
   int32_t prevAdvanceFP = 0;  // 12.4 fixed-point: prev glyph's advance + next kern for snap
 
   uint32_t cp;
@@ -3162,8 +3198,10 @@ void GfxRenderer::drawTextRotated90CW(const int fontId, const int x, const int y
     lastBaseWidth = glyph ? glyph->width : 0;
     lastBaseTop = glyph ? glyph->top : 0;
     prevAdvanceFP = glyph ? glyph->advanceX : 0;  // 12.4 fixed-point
+    const ThaiMarkOffset thai = thaiMarkOffset(font, cp, glyph, text, style, thaiMarks);
 
-    renderCharImpl<TextRotation::Rotated90CW>(*this, renderMode, font, cp, x, lastBaseY, black, style);
+    renderCharImpl<TextRotation::Rotated90CW>(*this, renderMode, font, cp, x - thai.raise, lastBaseY + thai.shiftLeft,
+                                              black, style);
     prevCp = cp;
   }
 }

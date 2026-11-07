@@ -116,6 +116,42 @@ constexpr int raiseAboveBase(const Anchor anchor, const int markTop, const int m
 
 }  // namespace combiningMark
 
+/// Thai fonts place every above-base mark at one height and rely on GPOS to
+/// lift a tone mark over an upper vowel (or SARA AM's nikhahit). Without GPOS
+/// the marks overlap, so stack each mark above the one drawn before it.
+namespace thaiMark {
+
+constexpr uint32_t SARA_AM = 0x0E33;
+
+/// MAI HAN-AKAT, upper vowels SARA I..SARA UEE, and MAITAIKHU..YAMAKKAN.
+constexpr bool isAbove(const uint32_t cp) {
+  return cp == 0x0E31 || (cp >= 0x0E34 && cp <= 0x0E37) || (cp >= 0x0E47 && cp <= 0x0E4E);
+}
+
+/// SARA U, SARA UU and PHINTHU: below-base marks, which leave the base's
+/// above-mark shift in place for a tone mark typed after them.
+constexpr bool isBelow(const uint32_t cp) { return cp >= 0x0E38 && cp <= 0x0E3A; }
+
+/// PO PLA, FO FA and FO FAN, whose ascender rises where above-base marks sit.
+constexpr bool hasTallAscender(const uint32_t cp) { return cp == 0x0E1B || cp == 0x0E1D || cp == 0x0E1F; }
+
+/// Pixels to shift above-base marks left of a tall ascender whose glyph top is
+/// `baseTop`. Noto Sans Thai's GPOS shifts them by 0.16-0.25 of that height.
+constexpr int tallAscenderShift(const int baseTop) { return baseTop / 5; }
+
+/// Tone marks and THANTHAKHAT: the marks that must clear SARA AM's nikhahit.
+constexpr bool isTone(const uint32_t cp) { return cp >= 0x0E48 && cp <= 0x0E4C; }
+
+/// Pixels to raise an above-base mark so it clears the mark below it, whose
+/// top is `belowTop` (0 when there is none).
+constexpr int raiseOver(const int markTop, const int markHeight, const int belowTop) {
+  return belowTop > 0
+             ? combiningMark::raiseAboveBase(combiningMark::Anchor::CenterRaised, markTop, markHeight, belowTop)
+             : 0;
+}
+
+}  // namespace thaiMark
+
 /// GCC/Clang (the ESP32 firmware toolchain) pack structs with __attribute__((packed)).
 /// MSVC (host unit tests) has no equivalent attribute and instead needs a #pragma pack
 /// region achieving the same 1-byte alignment. These macros keep the on-disk font layout
