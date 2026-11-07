@@ -4,6 +4,7 @@
 #include <GfxRenderer.h>
 #include <Logging.h>
 #include <Memory.h>
+#include <ThaiWordBreak.h>
 #include <Utf8.h>
 
 #include <algorithm>
@@ -105,6 +106,12 @@ std::vector<Hyphenator::BreakInfo> hangulLineEndBreaks(const std::string& word) 
     prev = cur;
   }
   return breaks;
+}
+
+// Gap-less break points inside a space-free word: between CJK characters, or between Thai words.
+std::vector<size_t> gaplessBreakByteOffsets(const std::string& text) {
+  auto offsets = CjkBreaks::characterBreakByteOffsets(text);
+  return offsets.empty() ? ThaiWordBreak::breakByteOffsets(text) : offsets;
 }
 
 // Scans text for explicit hyphens or dashes and returns byte offsets where a line break is permitted right after
@@ -537,7 +544,7 @@ void ParsedText::addWord(std::string word, const EpdFontFamily::Style fontStyle,
     wordVisibleOffsetDeltas.reserve(newCapacity);
   };
 
-  if (auto breakOffsets = CjkBreaks::characterBreakByteOffsets(word); !breakOffsets.empty()) {
+  if (auto breakOffsets = gaplessBreakByteOffsets(word); !breakOffsets.empty()) {
     // CJK-heavy paragraphs can push hundreds of tiny tokens quickly when CSS toggles
     // inline styles. Reserve once up front to avoid repeated vector growth reallocations.
     ensureTokenCapacity(breakOffsets.size() + 1);
