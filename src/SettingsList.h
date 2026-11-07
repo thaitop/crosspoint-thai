@@ -276,11 +276,43 @@ inline SettingInfo buildDoublePowerButtonSetting() {
       "doublePwrBtn", StrId::STR_CAT_CONTROLS);
 }
 
+struct HomeThemeOption {
+  StrId label;
+  uint8_t value;
+};
+
+// Menu order differs from stored values: Cover Grid needs PSRAM and is
+// left out on other boards, while stored theme values stay the same.
+inline std::vector<HomeThemeOption> homeThemeOptions() {
+  std::vector<HomeThemeOption> options = {{StrId::STR_THEME_CLASSIC, CrossPointSettings::CLASSIC},
+                                          {StrId::STR_THEME_LYRA, CrossPointSettings::LYRA},
+                                          {StrId::STR_THEME_LYRA_EXTENDED, CrossPointSettings::LYRA_3_COVERS},
+                                          {StrId::STR_THEME_ROUNDEDRAFF, CrossPointSettings::ROUNDEDRAFF}};
+  options.reserve(CrossPointSettings::UI_THEME_COUNT);
+  if (UITheme::supportsCoverGrid()) options.push_back({StrId::STR_THEME_COVER_GRID, CrossPointSettings::COVER_GRID});
+  options.push_back({StrId::STR_THEME_LEDGER, CrossPointSettings::LEDGER});
+  options.push_back({StrId::STR_THEME_TODAY, CrossPointSettings::TODAY});
+  options.push_back({StrId::STR_THEME_CALENDAR, CrossPointSettings::CALENDAR});
+  return options;
+}
+
 inline std::vector<StrId> homeThemeValues() {
-  static constexpr StrId VALUES[] = {StrId::STR_THEME_CLASSIC, StrId::STR_THEME_LYRA, StrId::STR_THEME_LYRA_EXTENDED,
-                                     StrId::STR_THEME_ROUNDEDRAFF, StrId::STR_THEME_COVER_GRID};
-  const size_t count = UITheme::supportsCoverGrid() ? std::size(VALUES) : std::size(VALUES) - 1;
-  return {VALUES, VALUES + count};
+  std::vector<StrId> values;
+  for (const auto& option : homeThemeOptions()) values.push_back(option.label);
+  return values;
+}
+
+inline uint8_t homeThemeDisplayValue() {
+  const auto options = homeThemeOptions();
+  for (size_t i = 0; i < options.size(); i++) {
+    if (options[i].value == SETTINGS.uiTheme) return static_cast<uint8_t>(i);
+  }
+  return 1;  // Lyra: a stored Cover Grid on a board without PSRAM draws as Lyra
+}
+
+inline void setHomeThemeFromDisplayValue(const uint8_t displayValue) {
+  const auto options = homeThemeOptions();
+  SETTINGS.uiTheme = displayValue < options.size() ? options[displayValue].value : CrossPointSettings::LYRA;
 }
 
 using SettingVisitor = void (*)(void* context, SettingInfo& info);

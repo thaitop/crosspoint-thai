@@ -5,13 +5,19 @@
 #include "./FileBrowserActivity.h"
 #include "RecentBooksStore.h"
 #include "activities/Activity.h"
+#include "components/CalendarHome.h"
 #include "components/CoverGridHomeUi.h"
+#include "components/LedgerHome.h"
+#include "components/TodayHome.h"
 #include "util/ButtonNavigator.h"
 
 struct Rect;
 
 class HomeActivity final : public Activity {
   std::unique_ptr<CoverGridHomeUi> coverGridUi;
+  std::unique_ptr<LedgerHome> ledgerHome;
+  std::unique_ptr<TodayHome> todayHome;
+  std::unique_ptr<CalendarHome> calendarHome;
   ButtonNavigator buttonNavigator;
   int selectorIndex = 0;
   bool recentsLoading = false;
@@ -88,6 +94,10 @@ class HomeActivity final : public Activity {
   void fillCoverGridFromLibrary();
   void resolveGridCoverPaths();
   void loadGridCover(RecentBook& book, int height, bool& showingLoading, Rect& popupRect);
+  bool hasThemeHome() const { return ledgerHome || todayHome || calendarHome; }
+  // Theme-drawn homes: covers and progress load after the first paint.
+  void loadThemeHomeCoversAndProgress();
+  void renderThemeHome();
 
  public:
   explicit HomeActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
