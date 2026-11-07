@@ -22,6 +22,11 @@ class ReaderActivity : public Activity {
   ReaderSession readerSession;
   std::atomic<bool> pageRendered{false};
   bool bookRemembered = false;
+  // Reading time this session for the daily log; gaps between rendered pages
+  // are capped so an idle open book stops counting.
+  unsigned long readingTickMs = 0;
+  uint32_t readingMs = 0;
+  void creditReadingTime();
   void markPageRendered() { pageRendered.store(true, std::memory_order_release); }
   void rememberBookOnceRendered();
 
