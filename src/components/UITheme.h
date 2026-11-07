@@ -44,6 +44,9 @@ class UITheme {
   static bool supportsCoverGrid();
   static bool hasCoverGridHome();
   static void drawCoverGridHome(CoverGridHomeUi& home);
+  static bool hasLedgerHome();
+  static bool hasTodayHome();
+  static bool hasCalendarHome();
   void reload();
   void setTheme(CrossPointSettings::UI_THEME type);
   static std::string getCoverThumbPath(std::string coverBmpPath, int coverHeight);

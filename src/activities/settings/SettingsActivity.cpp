@@ -256,10 +256,13 @@ void SettingsActivity::toggleSelectedSetting() {
     if (totalValues > 2) {
       const auto valueSetter = setting.valueSetter;
       auto onSelect = [this, valueSetter, sleepScreenChanged, quickResumeTimeoutChanged](int idx) {
+        const uint8_t themeBefore = SETTINGS.uiTheme;
         valueSetter(idx);
         syncQuickResumeTimeoutForSleepScreen(sleepScreenChanged, quickResumeTimeoutChanged);
         SETTINGS.saveToFile();
         rebuildSettings();
+        // The theme setting is a dynamic enum (its menu order varies by board).
+        if (SETTINGS.uiTheme != themeBefore) applyUiSettingChange(&CrossPointSettings::uiTheme);
       };
       if (!setting.enumStringValues.empty()) {
         optionPopup.show(setting.nameId, setting.enumStringValues, cur, std::move(onSelect));

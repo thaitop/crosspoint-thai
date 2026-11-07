@@ -14,6 +14,7 @@
 #include <Xtc.h>
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <vector>
 
@@ -240,9 +241,23 @@ void HomeActivity::onEnter() {
     // Screen-lifetime interaction tables and component properties exceed the stack budget.
     coverGridUi = makeUniqueNoThrow<CoverGridHomeUi>(renderer);
     if (!coverGridUi) LOG_ERR("HOME", "OOM: cover grid UI; using standard home");
+  } else if (UITheme::hasLedgerHome()) {
+    ledgerHome = makeUniqueNoThrow<LedgerHome>();
+    if (!ledgerHome) LOG_ERR("HOME", "OOM: ledger home; using standard home");
+  } else if (UITheme::hasTodayHome()) {
+    todayHome = makeUniqueNoThrow<TodayHome>();
+    if (!todayHome) LOG_ERR("HOME", "OOM: today home; using standard home");
+  } else if (UITheme::hasCalendarHome()) {
+    calendarHome = makeUniqueNoThrow<CalendarHome>();
+    if (!calendarHome) LOG_ERR("HOME", "OOM: calendar home; using standard home");
   }
-  loadRecentBooks(coverGridUi ? CoverGridHomeUi::MAX_BOOKS : metrics.homeRecentBooksCount);
+  loadRecentBooks(coverGridUi    ? CoverGridHomeUi::MAX_BOOKS
+                  : ledgerHome   ? LedgerHome::MAX_BOOKS
+                  : todayHome    ? TodayHome::MAX_BOOKS
+                  : calendarHome ? CalendarHome::MAX_BOOKS
+                                 : metrics.homeRecentBooksCount);
   hasContinueReading = !recentBooks.empty();
+  if (hasThemeHome()) resolveGridCoverPaths();
   if (coverGridUi) {
     fillCoverGridFromLibrary();
     resolveGridCoverPaths();
@@ -260,6 +275,9 @@ void HomeActivity::onExit() {
   Activity::onExit();
 
   coverGridUi.reset();
+  ledgerHome.reset();
+  todayHome.reset();
+  calendarHome.reset();
 
   // Free the stored cover buffer if any
   freeCoverBuffer();
@@ -303,6 +321,9 @@ void HomeActivity::freeCoverBuffer() {
 
 void HomeActivity::loop() {
   const int menuCount = getMenuItemCount();
+  // The calendar clock redraws on each new minute; this is not user activity,
+  // so auto-sleep still runs on schedule.
+  if (calendarHome && firstRenderDone && calendarHome->needsRedraw()) requestUpdate();
   const auto& metrics = UITheme::getInstance().getMetrics();
 
   auto activateSelection = [this] {
@@ -347,6 +368,15 @@ void HomeActivity::loop() {
   }
 
   const auto swipe = mappedInput.wasSwipe();
+  // Ledger swipes turn the in-progress list a page at a time when it overflows.
+  if (ledgerHome && (swipe == MappedInputManager::SwipeDir::Up || swipe == MappedInputManager::SwipeDir::Down)) {
+    const int paged = ledgerHome->pageList(selectorIndex, swipe == MappedInputManager::SwipeDir::Up ? 1 : -1);
+    if (paged >= 0) {
+      selectorIndex = paged;
+      requestUpdate();
+      return;
+    }
+  }
   if (swipe == MappedInputManager::SwipeDir::Up) {
     selectorIndex = ButtonNavigator::nextIndex(selectorIndex, menuCount);
     requestUpdate();
@@ -363,6 +393,26 @@ void HomeActivity::loop() {
   // files missing from the SD card).
   if (mappedInput.wasReleased(MappedInputManager::Button::Back) && hasContinueReading && !recentBooks.empty()) {
     onRecentBookSelected(recentBooks[0].path);
+    return;
+  }
+
+  if (hasThemeHome()) {
+    int x = 0;
+    int y = 0;
+    if (mappedInput.wasScreenTapped(x, y)) {
+      const int touched = ledgerHome     ? ledgerHome->hitTest(x, y)
+                          : calendarHome ? calendarHome->hitTest(x, y)
+                                         : todayHome->hitTest(x, y);
+      if (touched >= 0 && touched < menuCount) {
+        selectorIndex = touched;
+        haptic_feedback::touchAction();
+        activateSelection();
+      } else if (calendarHome && calendarHome->selectDayAt(x, y)) {
+        requestUpdate();
+      }
+      return;
+    }
+    if (mappedInput.wasReleased(MappedInputManager::Button::Confirm)) activateSelection();
     return;
   }
 
@@ -472,6 +522,10 @@ void HomeActivity::render(RenderLock&&) {
   const Rect content = UITheme::getInstance().getContentArea(renderer);
 
   renderer.clearScreen();
+  if (hasThemeHome()) {
+    renderThemeHome();
+    return;
+  }
   if (coverGridUi) {
     coverGridUi->setSelection(selectorIndex);
     UITheme::getInstance().drawCoverGridHome(*coverGridUi);
@@ -562,6 +616,61 @@ void HomeActivity::render(RenderLock&&) {
     recentsLoading = true;
     const int themeThumbHeight = GUI.homeCoverThumbHeight(renderer);
     loadRecentCovers(themeThumbHeight > 0 ? themeThumbHeight : metrics.homeCoverHeight);
+  }
+}
+
+void HomeActivity::loadThemeHomeCoversAndProgress() {
+  recentsLoading = true;
+  bool showingLoading = false;
+  Rect popupRect;
+  for (size_t i = 0; i < recentBooks.size(); ++i) {
+    const int height = ledgerHome     ? LedgerHome::coverHeightFor(i)
+                       : calendarHome ? CalendarHome::COVER_HEIGHT
+                                      : TodayHome::COVER_HEIGHT;
+    loadGridCover(recentBooks[i], height, showingLoading, popupRect);
+    if (showingLoading) GUI.fillPopupProgress(renderer, popupRect, (i + 1) * 100 / recentBooks.size());
+  }
+  if (ledgerHome) {
+    ledgerHome->loadProgress(recentBooks);
+  } else if (calendarHome) {
+    calendarHome->loadProgress(recentBooks);
+  } else {
+    todayHome->loadProgress();
+  }
+  recentsLoaded = true;
+  recentsLoading = false;
+}
+
+void HomeActivity::renderThemeHome() {
+  // Same order as indexToMenuItem(); the library slot shows Plugins or OPDS.
+  std::array<homeui::Tool, LedgerHome::MAX_TOOLS> tools{};
+  int toolCount = 0;
+  tools[toolCount++] = {tr(STR_HOME_TOOL_FILES), Folder};
+  tools[toolCount++] = {tr(STR_HOME_TOOL_LIBRARY), Library};
+  if (hasLibrarySlot()) tools[toolCount++] = {hasPlugins ? tr(STR_PLUGINS) : tr(STR_HOME_TOOL_OPDS), Blocks};
+  tools[toolCount++] = {tr(STR_HOME_TOOL_TRANSFER), Transfer};
+  tools[toolCount++] = {tr(STR_HOME_TOOL_SETTINGS), Settings};
+  if (ledgerHome) {
+    ledgerHome->render(renderer, recentBooks, tools.data(), toolCount, selectorIndex);
+  } else if (calendarHome) {
+    calendarHome->render(renderer, recentBooks, tools.data(), toolCount, selectorIndex);
+  } else {
+    todayHome->render(renderer, recentBooks, tools.data(), toolCount, selectorIndex);
+  }
+
+  const auto labels = mappedInput.mapLabels(recentBooks.empty() ? "" : tr(STR_RESUME), tr(STR_SELECT), tr(STR_DIR_UP),
+                                            tr(STR_DIR_DOWN));
+  GUI.drawButtonHints(renderer, labels.btn1, labels.btn2, labels.btn3, labels.btn4);
+  const bool clean = (cleanInitialRefresh && !firstRenderDone) || (calendarHome && calendarHome->takeHourTurn());
+  renderer.displayBuffer(clean ? HalDisplay::HALF_REFRESH : HalDisplay::FAST_REFRESH);
+
+  // Covers and progress load after the first paint so home appears at once.
+  if (!firstRenderDone) {
+    firstRenderDone = true;
+    requestUpdate();
+  } else if (!recentsLoaded && !recentsLoading) {
+    loadThemeHomeCoversAndProgress();
+    requestUpdate();
   }
 }
 

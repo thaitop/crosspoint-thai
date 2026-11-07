@@ -36,6 +36,12 @@ bool UITheme::hasCoverGridHome() { return SETTINGS.uiTheme == CrossPointSettings
 
 void UITheme::drawCoverGridHome(CoverGridHomeUi& home) { home.renderUi(); }
 
+bool UITheme::hasLedgerHome() { return SETTINGS.uiTheme == CrossPointSettings::LEDGER; }
+
+bool UITheme::hasTodayHome() { return SETTINGS.uiTheme == CrossPointSettings::TODAY; }
+
+bool UITheme::hasCalendarHome() { return SETTINGS.uiTheme == CrossPointSettings::CALENDAR; }
+
 void UITheme::setTheme(CrossPointSettings::UI_THEME type) {
   if (type == CrossPointSettings::COVER_GRID && !supportsCoverGrid()) type = CrossPointSettings::LYRA;
 
@@ -46,8 +52,12 @@ void UITheme::setTheme(CrossPointSettings::UI_THEME type) {
       currentMetrics = &BaseMetrics::values;
       break;
     case CrossPointSettings::UI_THEME::COVER_GRID:
+    case CrossPointSettings::UI_THEME::LEDGER:
+    case CrossPointSettings::UI_THEME::TODAY:
+    case CrossPointSettings::UI_THEME::CALENDAR:
     case CrossPointSettings::UI_THEME::LYRA: {
-      // The cover home owns its screen-lifetime UI state; other screens retain Lyra styling.
+      // Cover Grid, Ledger, Today and Calendar draw their own home; other
+      // screens retain Lyra styling.
       auto theme = makeUniqueNoThrow<LyraTheme>();
       if (!theme) {
         LOG_ERR("UI", "OOM: Lyra theme");
