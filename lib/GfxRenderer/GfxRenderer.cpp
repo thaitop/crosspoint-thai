@@ -8,6 +8,7 @@
 #include <Logging.h>
 #include <MemoryManager.h>
 #include <SdCardFont.h>
+#include <ThaiWordBreak.h>
 #include <TtfEpdFont.h>
 #include <Utf8.h>
 
@@ -1880,7 +1881,7 @@ std::string GfxRenderer::truncatedText(const int fontId, const char* text, const
       ++end;
       while (end < item.size() && (static_cast<unsigned char>(item[end]) & 0xC0) == 0x80) ++end;
     }
-    candidate.assign(item.data(), end);
+    candidate.assign(item.data(), ThaiWordBreak::clusterStart(item, end));
     candidate += ellipsis;
   };
 
@@ -1943,16 +1944,30 @@ std::vector<std::string> GfxRenderer::wrappedText(const int fontId, const char* 
       // remaining line budget.
       remaining = remaining.empty() ? word : word + " " + remaining;
     } else {
-      // Single word wider than the line — a no-space filename or a CJK run,
-      // which has no space boundaries at all. Hard-split at the widest UTF-8
-      // prefix that fits (never below one codepoint, so the loop advances) and
-      // requeue the rest to keep wrapping.
+      // Single word wider than the line — a no-space filename, a CJK run or a
+      // Thai phrase, which have no space boundaries at all. Hard-split at the
+      // widest UTF-8 prefix that fits (never below one codepoint, so the loop
+      // advances), backed off to the last Thai word break or else the last
+      // whole cluster, and requeue the rest to keep wrapping.
       size_t fit = 0;
       while (fit < word.size()) {
         size_t next = fit + 1;
         while (next < word.size() && (static_cast<unsigned char>(word[next]) & 0xC0) == 0x80) next++;
         if (fit > 0 && getTextWidth(fontId, word.substr(0, next).c_str(), style) > maxWidth) break;
         fit = next;
+      }
+      if (fit < word.size()) {
+        size_t wordBreak = 0;
+        for (const size_t offset : ThaiWordBreak::breakByteOffsets(word)) {
+          if (offset > fit) break;
+          wordBreak = offset;
+        }
+        const size_t clusterBreak = ThaiWordBreak::clusterStart(word, fit);
+        if (wordBreak > 0) {
+          fit = wordBreak;
+        } else if (clusterBreak > 0) {
+          fit = clusterBreak;
+        }
       }
       lines.push_back(word.substr(0, fit));
       const std::string rest = word.substr(fit);
