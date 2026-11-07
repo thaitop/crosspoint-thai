@@ -90,6 +90,13 @@ if (parsedSize != fileSize) {
 
 ## `section.bin`
 
+### Version 74
+
+Version 74 keeps the binary layout and rebuilds completed and partial sections.
+Space-free Thai text now breaks between dictionary words instead of only at
+spaces. Cached line breaks and word positions change for Thai text. Book
+metadata and saved progress are kept.
+
 ### Version 73
 
 Version 73 keeps the binary layout and rebuilds completed and partial sections.

@@ -2,6 +2,7 @@
 #include <Epub/blocks/TextBlock.h>
 #include <Epub/hyphenation/Hyphenator.h>
 #include <GfxRenderer.h>
+#include <ThaiWordBreak.h>
 #include <gtest/gtest.h>
 
 #include <filesystem>
@@ -254,4 +255,23 @@ TEST(ClippingAnchors, DenseNfdHangulSurvivesChunkRetirement) {
   text.addWord("Cafe\xCC\x81", EpdFontFamily::REGULAR, false, false, 100000);
   text.layoutAndExtractLines(renderer, 0, 80, inspect);
   EXPECT_EQ(covered, 6u * 66 + 5);
+}
+
+TEST(ThaiLineBreaking, SpaceFreeThaiWrapsBetweenDictionaryWords) {
+  // One space-free Thai phrase (184 px at 8 px per codepoint) in an 80 px column.
+  const std::string phrase = "ภาษาไทยไม่มีการเว้นวรรค";
+  const auto lines = layout({phrase.c_str()}, false, 80);
+  ASSERT_GT(lines.size(), 1u);
+  std::vector<std::string> tokens;
+  for (const auto& line : lines) tokens.insert(tokens.end(), line.words.begin(), line.words.end());
+  // Every laid-out token is one whole dictionary word.
+  std::vector<std::string> expected;
+  size_t last = 0;
+  for (const size_t offset : ThaiWordBreak::breakByteOffsets(phrase)) {
+    expected.push_back(phrase.substr(last, offset - last));
+    last = offset;
+  }
+  expected.push_back(phrase.substr(last));
+  ASSERT_GT(expected.size(), 2u);
+  EXPECT_EQ(tokens, expected);
 }
