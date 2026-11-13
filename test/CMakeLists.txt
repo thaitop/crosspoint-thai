@@ -97,6 +97,7 @@ add_subdirectory(plugin_catalog_paging)
 add_subdirectory(plugin_manifest_classification)
 add_subdirectory(plugin_picker_layout)
 add_subdirectory(protected_paths)
+add_subdirectory(thai_calendar)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME translation_spacing COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_translation_spacing.py)
@@ -116,5 +117,6 @@ add_test(NAME button_remap_release COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT
 add_test(NAME list_viewport COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_list_viewport.py)
 add_test(NAME clipping_highlight_planes COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_clipping_highlight_planes.py)
 add_test(NAME clipping_selection_text COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_clipping_selection_text.py)
+add_test(NAME thai_lunar_table COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_thai_lunar_table.py)
 
 add_test(NAME recursive_dictionary COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_recursive_dictionary.py)
