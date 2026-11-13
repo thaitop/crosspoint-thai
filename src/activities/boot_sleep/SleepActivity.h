@@ -26,6 +26,7 @@ class SleepActivity final : public Activity {
   void renderLastScreenSleepScreen() const;
   void renderTransparentCustomSleepScreen() const;
   void renderBlankSleepScreen() const;
+  void renderThaiCalendarSleepScreen() const;
 
   bool fromTimeout = false;
   // Cover + Transparent: the cover under the overlay, and the same cover while its gray planes are redrawn.

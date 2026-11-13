@@ -29,6 +29,8 @@ class CrossPointSettings : public PersistableStore<CrossPointSettings> {
     QUICK_RESUME = 6,
     TRANSPARENT_CUSTOM = 7,
     COVER_TRANSPARENT = 8,
+    THAI_CALENDAR = 9,
+    THAI_CALENDAR_DARK = 10,
     SLEEP_SCREEN_MODE_COUNT
   };
   enum SLEEP_SCREEN_COVER_MODE { FIT = 0, CROP = 1, SLEEP_SCREEN_COVER_MODE_COUNT };
