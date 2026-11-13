@@ -25,9 +25,9 @@ constexpr int DOT_MINUTES = 10;
 constexpr int DOT_COLS = 6;
 constexpr int DOT_ROWS = 4;
 constexpr int DISC_MAX = 52;
-// Day ink by minutes read: thin ring, thick ring, then solid.
-constexpr uint32_t THICK_RING_MINUTES = 60;
-constexpr uint32_t SOLID_MINUTES = 120;
+// Past-day fill by minutes read: faint dots, light gray, dark gray, then black.
+constexpr uint32_t DARK_MINUTES = 60;
+constexpr uint32_t BLACK_MINUTES = 120;
 constexpr unsigned long DAY_INFO_MS = 10000;
 #ifndef OMIT_FONTS
 constexpr int NUMBER_FONT_ID = NOTOSANS_18_FONT_ID;
@@ -76,6 +76,20 @@ void fillDisc(const GfxRenderer& renderer, const int cx, const int cy, const int
   for (int dy = -r; dy <= r; ++dy) {
     const int half = halfChord(r, dy);
     if (half >= 0) renderer.fillRectDither(cx - half, cy + dy, 2 * half + 1, 1, color);
+  }
+}
+
+// 12.5% staggered dots, paler than the renderer's LightGray (25%), for days
+// that passed unread.
+void fillDiscFaint(const GfxRenderer& renderer, const int cx, const int cy, const int r) {
+  for (int dy = -r; dy <= r; ++dy) {
+    const int y = cy + dy;
+    const int half = halfChord(r, dy);
+    if (half < 0 || (y & 1) != 0) continue;
+    const int phase = (y & 2) != 0 ? 2 : 0;
+    for (int x = cx - half; x <= cx + half; ++x) {
+      if ((x & 3) == phase) renderer.drawPixel(x, y, true);
+    }
   }
 }
 
@@ -361,21 +375,21 @@ void CalendarHome::drawMonth(const GfxRenderer& renderer, const Rect rect, const
   dayCount = days;
   today = date->tm_mday;
 
-  // Ink grows with time read: thin ring, thick ring, solid disc. Unread days
-  // and days to come are bare numbers. Today wears an outer ring; a tapped
-  // day a dotted one.
+  // Days darken with time read: past days below the reading threshold get
+  // faint dots, then light gray, dark gray, black. Today stays bare until
+  // read, as do days to come. Today wears an outer ring; a tapped day a
+  // dotted one.
   for (int d = 1; d <= days; ++d) {
     const int slot = firstWeekday + d - 1;
     const int cx = gridX + colW * (slot % 7) + colW / 2;
     const int cy = gridY + rowH * (slot / 7) + rowH / 2;
     const uint32_t m = minutes[d - 1];
-    const bool solid = m >= SOLID_MINUTES;
-    if (solid) {
-      fillDisc(renderer, cx, cy, r, Color::Black);
-    } else if (m >= THICK_RING_MINUTES) {
-      drawRing(renderer, cx, cy, r, std::max(4, r / 4));
-    } else if (m > 0) {
-      drawRing(renderer, cx, cy, r, 2);
+    // White numbers on the dark fills; black on light gray stays readable.
+    const bool dark = m >= DARK_MINUTES;
+    if (m > 0) {
+      fillDisc(renderer, cx, cy, r, m >= BLACK_MINUTES ? Color::Black : dark ? Color::DarkGray : Color::LightGray);
+    } else if (d < today) {
+      fillDiscFaint(renderer, cx, cy, r);
     }
     if (d == today) {
       drawRing(renderer, cx, cy, r + 4, 2);
@@ -389,7 +403,7 @@ void CalendarHome::drawMonth(const GfxRenderer& renderer, const Rect rect, const
     }
     char label[4];
     snprintf(label, sizeof(label), "%d", d);
-    drawCentered(renderer, UI_10_FONT_ID, cx, cy, label, !solid,
+    drawCentered(renderer, UI_10_FONT_ID, cx, cy, label, !dark,
                  m > 0 || d == today ? EpdFontFamily::BOLD : EpdFontFamily::REGULAR);
   }
 }
