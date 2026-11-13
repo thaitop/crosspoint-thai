@@ -106,6 +106,11 @@ for spec in "8 Regular" "10 Regular" "10 Bold" "12 Regular" "12 Bold"; do
   echo "Generated ../builtinFonts/${font_name}.h"
 done
 
+# Digits for the Thai calendar sleep screen, drawn scaled up; only 0-9 to keep flash small.
+# 104 keeps advanceY within the uint8_t font field.
+python fontconvert.py ubuntu_digits_bold 104 ../builtinFonts/source/Ubuntu/Ubuntu-Bold.ttf \
+  --only-additional-intervals --additional-intervals 0x30,0x39 > ../builtinFonts/ubuntu_digits_bold.h
+
 echo ""
 echo "Running compression verification..."
 python verify_compression.py ../builtinFonts/
