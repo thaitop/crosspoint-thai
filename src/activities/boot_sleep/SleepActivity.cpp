@@ -25,6 +25,8 @@
 
 #include "CrossPointSettings.h"
 #include "CrossPointState.h"
+#include "ReadingLogStore.h"
+#include "ThaiCalendarSleepScreen.h"
 #include "activities/reader/ReaderUtils.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
@@ -739,6 +741,9 @@ void SleepActivity::onEnter() {
   switch (SETTINGS.sleepScreen) {
     case (CrossPointSettings::SLEEP_SCREEN_MODE::BLANK):
       return renderBlankSleepScreen();
+    case (CrossPointSettings::SLEEP_SCREEN_MODE::THAI_CALENDAR):
+    case (CrossPointSettings::SLEEP_SCREEN_MODE::THAI_CALENDAR_DARK):
+      return renderThaiCalendarSleepScreen();
     case (CrossPointSettings::SLEEP_SCREEN_MODE::CUSTOM):
       return renderCustomSleepScreen();
     case (CrossPointSettings::SLEEP_SCREEN_MODE::COVER):
@@ -834,6 +839,20 @@ void SleepActivity::renderDefaultSleepScreen() const {
   }
 
   renderer.displayBuffer(kSleepClean);
+}
+
+void SleepActivity::renderThaiCalendarSleepScreen() const {
+#ifndef OMIT_FONTS
+  struct tm date;
+  if (ReadingLogStore::localDate(date)) {
+    renderer.clearScreen();
+    drawThaiCalendarSleepScreen(renderer, date);
+    if (SETTINGS.sleepScreen == CrossPointSettings::SLEEP_SCREEN_MODE::THAI_CALENDAR_DARK) renderer.invertScreen();
+    renderer.displayBuffer(kSleepClean);
+    return;
+  }
+#endif
+  renderDefaultSleepScreen();
 }
 
 void SleepActivity::renderBitmapSleepScreen(const Bitmap& bitmap, const bool preserveBackground) const {

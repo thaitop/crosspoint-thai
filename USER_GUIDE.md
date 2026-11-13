@@ -221,6 +221,8 @@ Settings are grouped into **System**, **Display**, **Reader**, **Controls**, **L
   - "Quick resume" - The text of the last page read will be displayed on the sleep screen and a moon icon is shown on the edge of the screen. Waking up the device will return to the same page of the opened book. This is useful for quickly resuming reading without waiting for the device to fully wake up and load the book.
   - "Transparent" - A transparent overlay image drawn over the current screen; see [Sleep Screen](#37-sleep-screen) below for more information
   - "Cover + Transparent" - The transparent overlay image drawn over the cover of the last opened book, falls back to "Transparent" behavior if there is no book cover
+  - "Thai Calendar" - Today's date as a Thai calendar page, in Thai or English; see [Sleep Screen](#37-sleep-screen) below for more information
+  - "Thai Calendar (Dark)" - The same Thai calendar page, white on black
 - **Sleep Screen Cover Mode**: How to display the book cover or custom sleep image:
   
   - "Fit" (default) - Scale the image to fit centered on the screen, padding with white borders as necessary
@@ -569,6 +571,8 @@ The **Sleep Screen** setting controls what is displayed when the device goes to 
 | **Transparent**    | A BMP or PNG overlay drawn over the current screen. Supports PNG and 32-bit BGRA alpha transparency, and treats white as transparent in regular BMPs. Falls back to **Dark** if no valid overlay image is found. |
 | **Cover + Transparent** | The **Transparent** overlay drawn over the cover of the last opened book, from any screen. Falls back to **Transparent** behavior if there is no book cover, and to the plain cover if no valid overlay image is found. |
 | **None**           | A blank screen.                                                                                                              |
+| **Thai Calendar**  | Today's date on the Thai calendar: the year and zodiac year, month and weekday, a large day number, the moon phase with the Thai lunar date, the current week, and the next important Thai day. With the UI language set to Thai, the page is in Thai and shows the Buddhist Era year; with any other language it is in English and shows the Gregorian year. Needs the clock to be set; falls back to **Dark** without a valid date. The moon, lunar date and Buddhist holidays are shown up to the end of 2047. |
+| **Thai Calendar (Dark)** | The **Thai Calendar** page, white on black. |
 
 #### Cover settings
 
