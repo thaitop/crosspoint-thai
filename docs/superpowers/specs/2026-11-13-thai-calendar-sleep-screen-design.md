@@ -43,8 +43,8 @@ Layout rules from the owner:
 - The content must fill the whole screen height. The owner rejected an
   earlier layout because the bottom was empty. Spread the sections over the
   full height; do not add more content to fill space.
-- Screen text is Thai on this screen regardless of the UI language setting
-  (designer's call, see below).
+- Screen text follows the UI language: Thai when the UI is Thai, English
+  otherwise (owner decision, see below).
 
 ## Goals
 
@@ -117,14 +117,26 @@ Layout rules from the owner:
   `เดือน 8 หลัง`, e.g. `ขึ้น 4 ค่ำ เดือน 8 หลัง`. The first one stays
   `เดือน 8`.
 
+- **Language (changed 2026-11-13 after the first build):** all screen text
+  goes through the translations. Thai UI: as above (B.E. year, `ขึ้น 4 ค่ำ
+  เดือน 12`). Any other UI language uses English: Gregorian year
+  (`2026 · Year of the Horse`), `Waxing 4th night, Month 12`, second month 8
+  as `Month 8 (second)`, common English holiday names (`Loy Krathong`,
+  `Father's Day`), `24 Nov · in 11 days`.
+- **Dark variant:** a second sleep value, `THAI_CALENDAR_DARK`, shows the
+  same page white on black.
+
 ## Calls made by the designer (owner to check)
 
-- **Slim build:** the big-digit font and the lunar data go behind the
-  existing `OMIT_FONTS` guard. On builds with `OMIT_FONTS`, the menu still
-  shows the choice, but it falls back to the default sleep screen. No flash
+- **`OMIT_FONTS` builds:** the big-digit font goes behind the existing
+  `OMIT_FONTS` guard. On such builds the menu still shows the choice, but it
+  falls back to the default sleep screen. No board env in `platformio.ini`
+  sets `OMIT_FONTS` today (the `slim` env does not), so every board carries
+  the feature (about 31 KB). No flash
   limit is set; report the numbers and stop if a board no longer fits.
-- **Web settings page:** `src/network/html/SettingsPage.html:53` also lists
-  the sleep screen values; add the new value there too.
+- **Web settings page:** `src/network/html/SettingsPage.html` reads the
+  sleep screen options from the settings API (lines 177-191), so it needs no
+  change; only check that the new option appears.
 
 - **Big digits:** generate a digits-only large font (glyphs `0`–`9` only)
   from a font that is already in the firmware's font sources (Ubuntu Bold,
@@ -133,8 +145,6 @@ Layout rules from the owner:
   an 18 pt font would look blocky, so it is not used.
 - **No clock set:** if `localDate()` returns false, fall back to the default
   sleep screen.
-- **Language:** the screen is always Thai, because it is a Thai calendar.
-  Only the menu label is translated.
 - **Week starts on Sunday**, like the Calendar home theme.
 - **Important days list (default until the owner changes it):**
   - Lunar Buddhist days: มาฆบูชา, วิสาขบูชา, อาสาฬหบูชา, เข้าพรรษา,
