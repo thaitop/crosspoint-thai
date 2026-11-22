@@ -26,6 +26,7 @@ parser.add_argument("--compress", dest="compress", action="store_true", help="Co
 parser.add_argument("--zopfli", dest="zopfli", action="store_true", help="Use Zopfli for the DEFLATE backend instead of zlib. Produces standard raw-DEFLATE streams (decoded unchanged by the on-device uzlib inflater), typically a few percent smaller than zlib -9, at the cost of much slower compression. Requires --compress and the 'zopfli' package.")
 parser.add_argument("--glyph-x-nudge", dest="glyph_x_nudges", action="append", default=[], metavar="CODEPOINT,DX", help="Shift one glyph's outline DX/64 px sideways before rasterising (repeatable). For a stem that straddles a pixel boundary: in 1-bit mode both of its faint edge pixels turn black and the stem comes out a pixel too wide.")
 parser.add_argument("--force-autohint", dest="force_autohint", action="store_true", help="Force FreeType auto-hinter instead of native font hinting. Improves stem width consistency for fonts with weak or no native TrueType hints.")
+parser.add_argument("--kern-intervals", dest="kern_intervals", action="append", help="Keep kerning only for pairs whose two code points are both inside these intervals (min,max). Repeatable.")
 parser.add_argument("--pnum", dest="pnum", action="store_true", help="Use proportional numerals (pnum OpenType feature) instead of default tabular figures. Reduces visual gaps between digits in running prose.")
 args = parser.parse_args()
 
@@ -559,6 +560,12 @@ for face_idx, cps in face_idx_cps.items():
     kern_map.update(extract_kerning_fonttools(font_path, cps, ppem, pnum_subs=subs))
 
 print(f"kerning: {len(kern_map)} pairs extracted", file=sys.stderr)
+
+if args.kern_intervals:
+    kern_ints = [tuple(int(n, base=0) for n in i.split(",")) for i in args.kern_intervals]
+    in_kern_ints = lambda cp: any(lo <= cp <= hi for lo, hi in kern_ints)
+    kern_map = {pair: adj for pair, adj in kern_map.items() if in_kern_ints(pair[0]) and in_kern_ints(pair[1])}
+    print(f"kerning: {len(kern_map)} pairs kept by --kern-intervals", file=sys.stderr)
 
 # --- Derive class-based kerning from pairs ---
 kern_left_classes = []   # list of (codepoint, classId)
