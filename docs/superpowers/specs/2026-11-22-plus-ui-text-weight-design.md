@@ -20,7 +20,8 @@ the X4 Pro. Book pages are not part of this change.
 ## Goals / non-goals / anti-goals
 
 - Goal: regular-weight UI text on scaled-UI boards looks like the tested
-  spike `firmware_medium_dark_b` (owner approved it on the device).
+  spike `firmware_medium_dark_b`, then lightened to the 30/40/55% level map
+  (owner approved the final build on the device).
 - Non-goal: X4 / X4 Pro look (they use the 1-bit faces, unchanged); reader
   fonts; Hebrew/Arabic weight (no Medium sources in the repo).
 - Anti-goal: counters (`e a 8`, Thai loop heads) filling in.
@@ -51,8 +52,9 @@ the X4 Pro. Book pages are not part of this change.
    (U+0000–U+024F), General Punctuation (U+2000–U+206F) and Thai
    (U+0E00–U+0E7F). Other scripts in these faces draw without kerning.
 4. **Level map.** In `ScaledFont::scaleGlyph`, replace the linear `INK_FROM`
-   mapping with fixed thresholds: level 1 from 25% coverage, level 2 from 35%,
-   level 3 (black) from 45%. Update the comment. This applies to every scaled
+   mapping with fixed thresholds: level 1 from 30% coverage, level 2 from 40%,
+   level 3 (black) from 55%. (25/35/45% was tried in the full build and was
+   too heavy everywhere.) Update the comment. This applies to every scaled
    UI face, bold included (tested that way).
 5. Regenerate only the three changed headers; build `metalio_eink4_plus`.
 
