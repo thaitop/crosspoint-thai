@@ -92,17 +92,29 @@ python fontconvert.py ubuntu_8_regular 8 \
 # 2-bit sources for the UI faces on boards with a UI scale above 1, where
 # GfxRenderer scales them at runtime (ScaledFont). Their grey edge levels keep
 # stem widths even after scaling; the 1-bit faces stay for unscaled boards.
+# The Regular faces take Ubuntu and Noto Sans Thai Medium so scaled UI text
+# keeps solid stems. Ubuntu Medium has too many kerning classes for the font
+# format, so its kerning is kept for Latin, punctuation and Thai only. The
+# other fallbacks (Hebrew, Arabic, Vietnamese) have no Medium cut here and
+# stay Regular.
 for spec in "8 Regular" "10 Regular" "10 Bold" "12 Regular" "12 Bold"; do
   read -r size style <<< "$spec"
   font_name="ubuntu_${size}_$(echo $style | tr '[:upper:]' '[:lower:]')_2bit"
+  weight=$style
+  kern_args=()
+  if [ "$style" = "Regular" ]; then
+    weight=Medium
+    kern_args=(--kern-intervals 0x0000,0x024F --kern-intervals 0x0E00,0x0E7F --kern-intervals 0x2000,0x206F)
+  fi
   python fontconvert.py $font_name $size \
-    ../builtinFonts/source/Ubuntu/Ubuntu-${style}.ttf \
+    ../builtinFonts/source/Ubuntu/Ubuntu-${weight}.ttf \
     ../builtinFonts/source/NotoSans/NotoSans-${style}.ttf \
     ../builtinFonts/source/NotoSansHebrew/NotoSansHebrew-${style}.ttf \
     ../builtinFonts/source/NotoSansArabic/NotoSansArabic-${style}.ttf \
-    ../builtinFonts/source/NotoSansThai/NotoSansThai-${style}.ttf \
+    ../builtinFonts/source/NotoSansThai/NotoSansThai-${weight}.ttf \
     ../builtinFonts/source/Ubuntu/Ubuntu-Vietnamese-${style}.ttf \
-    --2bit --compress --additional-intervals 0x05D0,0x05EA "${ARABIC_INTERVALS[@]}" "${THAI_INTERVALS[@]}" > ../builtinFonts/${font_name}.h
+    --2bit --compress --additional-intervals 0x05D0,0x05EA "${ARABIC_INTERVALS[@]}" "${THAI_INTERVALS[@]}" \
+    "${kern_args[@]}" > ../builtinFonts/${font_name}.h
   echo "Generated ../builtinFonts/${font_name}.h"
 done
 
