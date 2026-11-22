@@ -157,15 +157,17 @@ const uint8_t* ScaledFont::scaleGlyph(const uint32_t index) {
 
   uint8_t* out = allocZeroed((static_cast<size_t>(dstW) * dstH + 3) / 4);
   if (!out) return nullptr;
-  // The B/W pass paints every non-white level, so INK_FROM sets the stroke
-  // weight: with the grid fit, 30% coverage matched the stem widths of
-  // natively rasterized Ubuntu at 1.6x from 2-bit sources. The three ink
-  // levels split the rest of the range.
-  constexpr int INK_FROM = FULL * 3 / 10;
+  // A gray UI frame shows levels 1 and 2 as edge grays and only level 3 as
+  // black, so black starts low enough to keep solid stems. Tuned on the
+  // Metalio E-Ink4-Plus panel. The B/W pass paints every non-white level, so
+  // LIGHT_FROM alone sets the B/W stroke weight.
+  constexpr int LIGHT_FROM = FULL * 30 / 100;
+  constexpr int DARK_FROM = FULL * 40 / 100;
+  constexpr int BLACK_FROM = FULL * 55 / 100;
   for (int dy = 0; dy < dstH; ++dy) {
     for (int dx = 0; dx < dstW; ++dx) {
       const int coverage = coverageAt(dx, dy, ox, oy);
-      const int level = coverage < INK_FROM ? 0 : std::min(3, 1 + 3 * (coverage - INK_FROM) / (FULL - INK_FROM));
+      const int level = coverage >= BLACK_FROM ? 3 : coverage >= DARK_FROM ? 2 : coverage >= LIGHT_FROM ? 1 : 0;
       const int pos = dy * dstW + dx;
       out[pos >> 2] |= static_cast<uint8_t>(level << ((3 - (pos & 3)) * 2));
     }
