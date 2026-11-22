@@ -468,6 +468,20 @@ https://openfontlicense.org
 Full terms: see the shared OFL 1.1 section at the end of this file.
 
 ========================================================================
+NotoSansThai
+Source: lib/EpdFont/builtinFonts/source/NotoSansThai
+========================================================================
+
+Copyright 2022 The Noto Project Authors (https://github.com/notofonts/thai)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is also available with a FAQ at:
+https://openfontlicense.org
+
+
+Full terms: see the shared OFL 1.1 section at the end of this file.
+
+========================================================================
 OpenDyslexic
 Source: lib/EpdFont/builtinFonts/source/OpenDyslexic
 ========================================================================

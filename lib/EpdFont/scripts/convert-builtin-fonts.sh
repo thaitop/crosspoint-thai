@@ -100,8 +100,9 @@ for spec in "8 Regular" "10 Regular" "10 Bold" "12 Regular" "12 Bold"; do
     ../builtinFonts/source/NotoSans/NotoSans-${style}.ttf \
     ../builtinFonts/source/NotoSansHebrew/NotoSansHebrew-${style}.ttf \
     ../builtinFonts/source/NotoSansArabic/NotoSansArabic-${style}.ttf \
+    ../builtinFonts/source/NotoSansThai/NotoSansThai-${style}.ttf \
     ../builtinFonts/source/Ubuntu/Ubuntu-Vietnamese-${style}.ttf \
-    --2bit --compress --additional-intervals 0x05D0,0x05EA "${ARABIC_INTERVALS[@]}" > ../builtinFonts/${font_name}.h
+    --2bit --compress --additional-intervals 0x05D0,0x05EA "${ARABIC_INTERVALS[@]}" "${THAI_INTERVALS[@]}" > ../builtinFonts/${font_name}.h
   echo "Generated ../builtinFonts/${font_name}.h"
 done
 
