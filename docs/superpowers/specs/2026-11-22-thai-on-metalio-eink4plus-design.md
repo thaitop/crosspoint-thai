@@ -113,3 +113,15 @@ These 23 files were changed by both the Thai commits and the Plus branch
 - Resolving each conflict, based on the rules above.
 - Whether a Thai commit needs a small follow-up fix commit after replay,
   instead of changing it heavily during the replay.
+
+## Owner decision at handoff (2026-11-22)
+
+The owner keeps the two devices on separate branches:
+
+- X4 Pro stays on `thai-2.0.0`, which is stable on that device.
+- `thai-eink4plus` is for the Metalio E-Ink4-Plus only.
+
+So the "one branch serves both devices" goal above no longer applies. `x4pro`
+still builds on `thai-eink4plus`, but X4 Pro hardware testing of this branch is
+not required. The owner accepted the other handoff points: Thai glyphs in the
+2-bit UI fonts, and section cache version 76.
