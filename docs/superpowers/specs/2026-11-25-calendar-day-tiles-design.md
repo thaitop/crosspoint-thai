@@ -10,8 +10,7 @@ apart. Levels were pale and hard to tell apart. The owner also wanted a clearer
 
 ## Goals
 
-- Every pattern and shape drawn in panel pixels, laid out once per group so
-  equal shapes are equal.
+- Crisp shapes with panel-pixel edges; equal shapes come out equal.
 - Reading levels that read as one rule: the longer you read, the darker.
 - One visual language of round dots; a today marker stronger than a ring.
 
@@ -19,7 +18,8 @@ apart. Levels were pale and hard to tell apart. The owner also wanted a clearer
 
 - No true gray: the full-tone gray table makes every gray area flash through
   black (`lib/GfxRenderer/GfxRenderer.cpp`, comment above `kGrayUiLevels`).
-- No renderer or SDK change; no change to the 60/120 minute thresholds.
+- No SDK change; no change to the 60/120 minute thresholds. (The first
+  version also avoided renderer changes; see "Renderer support".)
 - No new heap allocation.
 
 ## Approaches
@@ -30,12 +30,12 @@ apart. Levels were pale and hard to tell apart. The owner also wanted a clearer
 - C. The two edge gray levels (9, 12) over areas. No flash, but the code notes
   they are grainy over an area.
 
-## Design (as accepted on hardware)
+## Design
 
 | Day | Disc | Number |
 |---|---|---|
 | future | none | black |
-| past, no counted reading | 2 px ring in 75% dots | black |
+| past, no counted reading | 2 px ring in 75% dots (2 px at scales 1.0 and 1.5) | black |
 | 1–59 min | 25% | black, bold |
 | 60–119 min | 50% | black, bold |
 | 120+ min | black | white |
@@ -47,16 +47,38 @@ alike), white numbers on 50% (break up), a chip behind numbers (confusing),
 no frame on unread days, a 1 px frame (breaks), a date badge in the clock,
 rounded-square day tiles (discs match the clock and reading dots better).
 
-- Day grid: converted to panel pixels once; every disc has one size and is
-  placed from one origin. Numbers stay in UI units.
+- Day grid: every disc has one size (`fillCircle`/`drawCircle` scale the
+  diameter on their own). Numbers stay in UI units.
 - Reading dots: empty dots are 2 px rings, read dots solid; spread to the
-  tile padding, laid out once in panel pixels.
+  tile padding in equal UI-unit steps.
 - Clock: HH:MM on one row of round white dots (dot-matrix 5x7 glyphs plus a
   colon), square cells sized to fit the padded tile, centered, laid out once
   in panel pixels. The date badge was removed (the calendar shows the date).
 
-All in `src/components/CalendarHome.cpp`. Discs, rings and dots share one
-row-span helper.
+## Renderer support (follow-up)
+
+The first version drew every shape in `CalendarHome` under `PhysicalScope`.
+The cause is in the renderer: `spRect` scales a rect's two corners, so equal
+sizes at different positions round to different widths, and there was no
+circle primitive. The owner asked for the fix to live in the renderer:
+
+- `GfxRenderer::fillCircle(x, y, diameter, color)` and
+  `drawCircle(x, y, diameter, lineWidth, color)`: the diameter is scaled on its
+  own, so equal circles stay equal anywhere, and the edge is found in panel
+  pixels.
+- `Color::DarkerGray`: a 75% dither (white on odd/odd pixels), handled
+  everywhere the other dither colors are, with gray-frame ink 11.
+
+`CalendarHome` draws day discs, rings, the badge and the reading dots with
+these in UI units. The clock alone still lays out its grid in panel pixels
+under `PhysicalScope`: whole UI units would either shrink the clock about 10%
+(cell rounded down) or space its dots unevenly (owner chose this hybrid).
+
+Thin rings ask for the UI width that gives 2 panel pixels on the current
+scale: 1 unit at 1.5, 2 units at 1.0. A 1 px ring breaks on the glass.
+
+The first version was accepted on the Plus; this renderer version must be
+checked on the device again.
 
 ## Verification
 

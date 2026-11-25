@@ -42,7 +42,7 @@ struct Frame;
 
 // Color representation: uint8_t mapped to 4x4 Bayer matrix dithering levels
 // 0 = transparent, 1-16 = gray levels (white to black)
-enum Color : uint8_t { Clear = 0x00, White = 0x01, LightGray = 0x05, DarkGray = 0x0A, Black = 0x10 };
+enum Color : uint8_t { Clear = 0x00, White = 0x01, LightGray = 0x05, DarkGray = 0x0A, DarkerGray = 0x0D, Black = 0x10 };
 
 class GfxRenderer {
  public:
@@ -150,9 +150,11 @@ class GfxRenderer {
   // GRAY_FOLLOWS_FB means the pixel is whatever the framebuffer says; any
   // other value is its ink, 0 = white .. 15 = black.
   static constexpr uint8_t GRAY_FOLLOWS_FB = 0xFF;
-  // Flat levels for the two dither colors: their ink shares, 1 in 4 and 1 in 2.
+  // Flat levels for the dither colors: their ink shares, 1 in 4, 1 in 2 and
+  // 3 in 4.
   static constexpr uint8_t GRAY_LIGHT_INK = 4;
   static constexpr uint8_t GRAY_DARK_INK = 8;
+  static constexpr uint8_t GRAY_DARKER_INK = 11;
   // The two edge levels shown without CROSSPOINT_GRAY_UI_FULL_TONE. On the
   // Metalio E-Ink4-Plus the display maps these inks to the waveform levels its
   // overlay grayscale uses for a book page's light and dark gray.
@@ -402,6 +404,13 @@ class GfxRenderer {
   void fillRoundedRect(int x, int y, int width, int height, int cornerRadius, Color color) const;
   void fillRoundedRect(int x, int y, int width, int height, int cornerRadius, bool roundTopLeft, bool roundTopRight,
                        bool roundBottomLeft, bool roundBottomRight, Color color) const;
+  // A circle inscribed in the square at (x, y) with the given diameter. Under a
+  // UI scale the diameter is scaled on its own, so equal circles stay equal
+  // wherever they sit, and the edge is found in panel pixels.
+  void fillCircle(int x, int y, int diameter, Color color) const;
+  // The same circle's outline, lineWidth thick, drawn inward. It takes a Color,
+  // unlike the other outlines, so a ring can be gray.
+  void drawCircle(int x, int y, int diameter, int lineWidth, Color color) const;
   void drawImage(const uint8_t bitmap[], int x, int y, int width, int height) const;
   void drawIcon(const uint8_t bitmap[], int x, int y, int size) const;
 #if CROSSPOINT_HIRES_UI_ICONS
@@ -432,8 +441,8 @@ class GfxRenderer {
   }
   // While alive, drawing calls take and return physical pixels. Scaled public
   // calls use it so their implementation is not scaled again; callers use it
-  // for content that already is panel pixels: book images, XTC pages, sleep
-  // and BMP images.
+  // for content that already is panel pixels (book images, XTC pages, sleep
+  // and BMP images) or laid out on a fractional panel-pixel grid.
   struct PhysicalScope {
     const GfxRenderer& renderer;
     bool previous;

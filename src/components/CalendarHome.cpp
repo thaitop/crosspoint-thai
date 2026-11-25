@@ -51,51 +51,34 @@ constexpr uint8_t GLYPHS[][GLYPH_H] = {
     {0x00, 0x00, 0x04, 0x00, 0x04, 0x00, 0x00},  // : (middle column)
 };
 
-int halfChord(const int r, const int dy) {
-  const float rr = (static_cast<float>(r) + 0.5f) * (static_cast<float>(r) + 0.5f);
-  const float d2 = rr - static_cast<float>(dy * dy);
-  return d2 > 0 ? static_cast<int>(std::sqrt(d2)) : -1;
+// A disc of the given diameter centered on (cx, cy).
+void fillDot(const GfxRenderer& renderer, const int cx, const int cy, const int d, const Color color) {
+  renderer.fillCircle(cx - d / 2, cy - d / 2, d, color);
 }
 
-// The shape helpers below take panel pixels and run inside a PhysicalScope:
-// scaled UI units would step edges and round equal shapes to unequal sizes.
-
-// Calls span(x, y, width) for each row run of a ring of outer radius pr and
-// the given thickness; a thickness past the radius gives a solid disc.
-template <typename Span>
-void forEachRingSpan(const int cx, const int cy, const int pr, const int thickness, Span span) {
-  const int inner = pr - thickness;
-  for (int dy = -pr; dy <= pr; ++dy) {
-    const int outerHalf = halfChord(pr, dy);
-    if (outerHalf < 0) continue;
-    const int innerHalf = inner >= 0 && std::abs(dy) <= inner ? halfChord(inner, dy) : -1;
-    if (innerHalf < 0) {
-      span(cx - outerHalf, cy + dy, 2 * outerHalf + 1);
-    } else {
-      span(cx - outerHalf, cy + dy, outerHalf - innerHalf);
-      span(cx + innerHalf + 1, cy + dy, outerHalf - innerHalf);
-    }
-  }
+// A ring of the given diameter centered on (cx, cy).
+void drawRing(const GfxRenderer& renderer, const int cx, const int cy, const int d, const int lineWidth,
+              const Color color) {
+  renderer.drawCircle(cx - d / 2, cy - d / 2, d, lineWidth, color);
 }
 
-// A solid disc, or an empty one as a 2-pixel ring.
-void drawDot(const GfxRenderer& renderer, const int cx, const int cy, const int pr, const bool filled,
-             const bool black = true) {
-  forEachRingSpan(cx, cy, pr, filled ? pr + 1 : 2,
-                  [&](const int x, const int y, const int w) { renderer.fillRect(x, y, w, 1, black); });
+// UI units for a 2-pixel line at scales 1.0 and 1.5: a single pixel breaks on the
+// glass, and in 75% dots it breaks into dashes.
+int thinLine(const GfxRenderer& renderer) {
+  return std::max(1, static_cast<int>(std::lround(2.0f / renderer.uiScale())));
 }
 
-// One glyph as white dots on a grid already in panel pixels: column c sits at
-// x + (c + 0.5) * cellW. Placing every glyph on the same grid keeps the dots
-// evenly spaced.
-void drawGlyph(const GfxRenderer& renderer, const int glyph, const int x, const int y, const float cellW,
-               const float cellH, const int startCol, const int r) {
+// One glyph as white dots on a grid of square cells: column c is centered at
+// x + (c + 0.5) * cell. The cell may be fractional, so the clock passes panel
+// pixels and every glyph shares one grid.
+void drawGlyph(const GfxRenderer& renderer, const int glyph, const int x, const int y, const float cell,
+               const int startCol, const int d) {
   for (int row = 0; row < GLYPH_H; ++row) {
     for (int col = 0; col < GLYPH_W; ++col) {
       if (GLYPHS[glyph][row] & (0x10 >> col)) {
-        const int cx = x + static_cast<int>(std::lround((static_cast<float>(startCol + col) + 0.5f) * cellW));
-        const int cy = y + static_cast<int>(std::lround((static_cast<float>(row) + 0.5f) * cellH));
-        drawDot(renderer, cx, cy, r, true, false);
+        const int cx = x + static_cast<int>(std::lround((static_cast<float>(startCol + col) + 0.5f) * cell));
+        const int cy = y + static_cast<int>(std::lround((static_cast<float>(row) + 0.5f) * cell));
+        fillDot(renderer, cx, cy, d, Color::White);
       }
     }
   }
@@ -103,30 +86,17 @@ void drawGlyph(const GfxRenderer& renderer, const int glyph, const int x, const 
 
 // A day's disc shaded by minutes read: 25%, 50%, then black. Single-pixel
 // dots spread on the glass, so levels need wide steps to look apart.
-void fillDayDisc(const GfxRenderer& renderer, const int cx, const int cy, const int pr, const uint32_t minutes) {
-  const Color color = minutes >= BLACK_MINUTES  ? Color::Black
-                      : minutes >= DARK_MINUTES ? Color::DarkGray
-                                                : Color::LightGray;
-  forEachRingSpan(cx, cy, pr, pr + 1,
-                  [&](const int x, const int y, const int w) { renderer.fillRectDither(x, y, w, 1, color); });
-}
-
-// A 2-pixel ring in 75% dots: lighter than black, still unbroken.
-void drawUnreadRing(const GfxRenderer& renderer, const int cx, const int cy, const int pr) {
-  forEachRingSpan(cx, cy, pr, 2, [&](const int x, const int y, const int w) {
-    renderer.fillRect(x, y, w, 1, true);
-    if ((y & 1) == 0) return;
-    for (int px = x | 1; px < x + w; px += 2) renderer.drawPixel(px, y, false);
-  });
+Color dayColor(const uint32_t minutes) {
+  return minutes >= BLACK_MINUTES ? Color::Black : minutes >= DARK_MINUTES ? Color::DarkGray : Color::LightGray;
 }
 
 // A ring of small dots, every 15 degrees.
-void drawDottedRing(const GfxRenderer& renderer, const int cx, const int cy, const int pr) {
+void drawDottedRing(const GfxRenderer& renderer, const int cx, const int cy, const int r) {
   for (int a = 0; a < 360; a += 15) {
     const float rad = static_cast<float>(a) * 3.14159265f / 180.0f;
-    const int px = cx + static_cast<int>(std::lround(std::cos(rad) * static_cast<float>(pr)));
-    const int py = cy + static_cast<int>(std::lround(std::sin(rad) * static_cast<float>(pr)));
-    renderer.fillRect(px - 1, py - 1, 3, 3, true);
+    const int px = cx + static_cast<int>(std::lround(std::cos(rad) * static_cast<float>(r)));
+    const int py = cy + static_cast<int>(std::lround(std::sin(rad) * static_cast<float>(r)));
+    fillDot(renderer, px, py, 2, Color::Black);
   }
 }
 
@@ -244,6 +214,8 @@ void CalendarHome::drawClock(const GfxRenderer& renderer, const Rect rect, const
   constexpr int COLS_TOTAL = 4 * GLYPH_W + 5;
   constexpr int START[4] = {0, GLYPH_W + 1, 2 * GLYPH_W + 4, 3 * GLYPH_W + 5};
   constexpr int COLON_COL = 2 * GLYPH_W + 2;
+  // The grid is laid out in panel pixels: whole UI units would round the cell
+  // and shrink the clock, or space its dots unevenly.
   int x = rect.x + TILE_PAD;
   int y = rect.y + TILE_PAD;
   int w = rect.width - 2 * TILE_PAD;
@@ -254,9 +226,7 @@ void CalendarHome::drawClock(const GfxRenderer& renderer, const Rect rect, const
   const float cell = std::min(static_cast<float>(w) / COLS_TOTAL, static_cast<float>(h) / GLYPH_H);
   x += static_cast<int>(std::lround((static_cast<float>(w) - cell * COLS_TOTAL) / 2));
   y += static_cast<int>(std::lround((static_cast<float>(h) - cell * GLYPH_H) / 2));
-  const float cellW = cell;
-  const float cellH = cell;
-  const int r = std::max(1, static_cast<int>(cell * 0.42f));
+  const int d = 2 * std::max(1, static_cast<int>(cell * 0.42f)) + 1;
   int glyphs[4] = {GLYPH_DASH, GLYPH_DASH, GLYPH_DASH, GLYPH_DASH};
   if (date) {
     int hour = date->tm_hour;
@@ -266,9 +236,9 @@ void CalendarHome::drawClock(const GfxRenderer& renderer, const Rect rect, const
     glyphs[2] = date->tm_min / 10;
     glyphs[3] = date->tm_min % 10;
   }
-  for (int i = 0; i < 4; ++i) drawGlyph(renderer, glyphs[i], x, y, cellW, cellH, START[i], r);
+  for (int i = 0; i < 4; ++i) drawGlyph(renderer, glyphs[i], x, y, cell, START[i], d);
   // The colon glyph lights its middle column; put that on the colon column.
-  if (date) drawGlyph(renderer, GLYPH_COLON, x, y, cellW, cellH, COLON_COL - GLYPH_W / 2, r);
+  if (date) drawGlyph(renderer, GLYPH_COLON, x, y, cell, COLON_COL - GLYPH_W / 2, d);
 }
 
 void CalendarHome::drawReadToday(const GfxRenderer& renderer, const Rect rect, const int minutes) const {
@@ -301,22 +271,21 @@ void CalendarHome::drawReadToday(const GfxRenderer& renderer, const Rect rect, c
   const int pitch = std::min(innerW / DOT_COLS, gridH / DOT_ROWS);
   if (pitch < 8) return;
   // Spread the dots to the tile's padding on every side; the spare room goes
-  // between them. Laid out once in panel pixels so every dot is the same size.
-  int x = innerX;
-  int y = gridY;
-  int w = innerW;
-  int h = gridH;
-  int r = std::max(3, pitch * 2 / 5);
-  renderer.physicalRect(x, y, w, h);
-  r = r * w / innerW;
-  const GfxRenderer::PhysicalScope physical(renderer);
-  const int spanX = w - 2 * r - 1;
-  const int spanY = h - 2 * r - 1;
+  // between them in equal steps.
+  const int d = std::max(6, pitch * 4 / 5);
+  const int stepX = (innerW - d) / (DOT_COLS - 1);
+  const int stepY = (gridH - d) / (DOT_ROWS - 1);
+  const int x0 = innerX + (innerW - d - stepX * (DOT_COLS - 1)) / 2 + d / 2;
+  const int y0 = gridY + (gridH - d - stepY * (DOT_ROWS - 1)) / 2 + d / 2;
   const int filled = std::max(0, minutes) / DOT_MINUTES;
   for (int i = 0; i < DOT_COLS * DOT_ROWS; ++i) {
-    const int cx = x + r + (i % DOT_COLS) * spanX / (DOT_COLS - 1);
-    const int cy = y + r + (i / DOT_COLS) * spanY / (DOT_ROWS - 1);
-    drawDot(renderer, cx, cy, r, i < filled);
+    const int cx = x0 + (i % DOT_COLS) * stepX;
+    const int cy = y0 + (i / DOT_COLS) * stepY;
+    if (i < filled) {
+      fillDot(renderer, cx, cy, d, Color::Black);
+    } else {
+      drawRing(renderer, cx, cy, d, thinLine(renderer), Color::Black);
+    }
   }
 }
 
@@ -403,36 +372,20 @@ void CalendarHome::drawMonth(const GfxRenderer& renderer, const Rect rect, const
   // Days darken with time read: 25%, 50%, then black. Past days with no
   // counted reading get a 75%-dot ring; days to come stay bare. Today wears a
   // solid outer ring and a badge; a tapped day a dotted ring.
-  // Discs are laid out once in panel pixels so every one is the same size;
-  // only the numbers are placed in UI units.
-  int px0 = gridX;
-  int py0 = gridY;
-  int pw = 7 * colW;
-  int ph = rows * rowH;
-  renderer.physicalRect(px0, py0, pw, ph);
-  const float k = static_cast<float>(pw) / static_cast<float>(7 * colW);
-  const auto P = [k](const int v) { return static_cast<int>(std::lround(static_cast<float>(v) * k)); };
-  const int pr = P(disc) / 2;
   for (int d = 1; d <= days; ++d) {
     const int slot = firstWeekday + d - 1;
     const int cx = gridX + colW * (slot % 7) + colW / 2;
     const int cy = gridY + rowH * (slot / 7) + rowH / 2;
-    const int pcx = px0 + static_cast<int>(std::lround((static_cast<float>(slot % 7) + 0.5f) * colW * k));
-    const int pcy = py0 + static_cast<int>(std::lround((static_cast<float>(slot / 7) + 0.5f) * rowH * k));
     const uint32_t m = minutes[d - 1];
-    {
-      const GfxRenderer::PhysicalScope physical(renderer);
-      if (m > 0) {
-        fillDayDisc(renderer, pcx, pcy, pr, m);
-      } else if (d < today) {
-        drawUnreadRing(renderer, pcx, pcy, pr);
-      }
-      if (d == today) {
-        forEachRingSpan(pcx, pcy, pr + P(4), P(2),
-                        [&](const int x, const int y, const int w) { renderer.fillRect(x, y, w, 1, true); });
-      } else if (d == selectedDay) {
-        drawDottedRing(renderer, pcx, pcy, pr + P(3));
-      }
+    if (m > 0) {
+      fillDot(renderer, cx, cy, disc, dayColor(m));
+    } else if (d < today) {
+      drawRing(renderer, cx, cy, disc, thinLine(renderer), Color::DarkerGray);
+    }
+    if (d == today) {
+      drawRing(renderer, cx, cy, disc + 8, 2, Color::Black);
+    } else if (d == selectedDay) {
+      drawDottedRing(renderer, cx, cy, disc / 2 + 3);
     }
     char label[4];
     snprintf(label, sizeof(label), "%d", d);
@@ -441,14 +394,10 @@ void CalendarHome::drawMonth(const GfxRenderer& renderer, const Rect rect, const
     if (d == today) {
       // A badge on the ring at the top right, ringed in paper so it shows on
       // any fill.
-      const GfxRenderer::PhysicalScope physical(renderer);
-      const int badge = P(std::max(4, disc / 8));
-      const int ring = P(2);
-      const int offset = static_cast<int>(std::lround(static_cast<float>(pr + P(2)) * 0.7071f));
-      const int bx = pcx + offset;
-      const int by = pcy - offset;
-      drawDot(renderer, bx, by, badge + ring, true, false);
-      drawDot(renderer, bx, by, badge, true);
+      const int badge = std::max(8, disc / 4);
+      const int offset = static_cast<int>(std::lround(static_cast<float>(disc / 2 + 2) * 0.7071f));
+      fillDot(renderer, cx + offset, cy - offset, badge + 4, Color::White);
+      fillDot(renderer, cx + offset, cy - offset, badge, Color::Black);
     }
   }
 }
