@@ -29,8 +29,9 @@ struct Frame;
 }
 
 // Color representation: uint8_t mapped to 4x4 Bayer matrix dithering levels
-// 0 = transparent, 1-16 = gray levels (white to black)
-enum Color : uint8_t { Clear = 0x00, White = 0x01, LightGray = 0x05, DarkGray = 0x0A, Black = 0x10 };
+// 0 = transparent, 1-16 = gray levels (white to black). The fills are 2x2
+// patterns: LightGray 1 in 4 black, DarkGray 2 in 4, DarkerGray 3 in 4.
+enum Color : uint8_t { Clear = 0x00, White = 0x01, LightGray = 0x05, DarkGray = 0x0A, DarkerGray = 0x0D, Black = 0x10 };
 
 class GfxRenderer {
  public:
@@ -320,6 +321,11 @@ class GfxRenderer {
   void fillRoundedRect(int x, int y, int width, int height, int cornerRadius, Color color) const;
   void fillRoundedRect(int x, int y, int width, int height, int cornerRadius, bool roundTopLeft, bool roundTopRight,
                        bool roundBottomLeft, bool roundBottomRight, Color color) const;
+  // A circle inscribed in the square at (x, y) with the given diameter.
+  void fillCircle(int x, int y, int diameter, Color color) const;
+  // The same circle's outline, lineWidth thick, drawn inward. It takes a Color,
+  // unlike the other outlines, so a ring can be gray.
+  void drawCircle(int x, int y, int diameter, int lineWidth, Color color) const;
   void drawImage(const uint8_t bitmap[], int x, int y, int width, int height) const;
   void drawIcon(const uint8_t bitmap[], int x, int y, int size) const;
   bool drawBitmap(const Bitmap& bitmap, int x, int y, int maxWidth, int maxHeight, float cropX = 0, float cropY = 0,

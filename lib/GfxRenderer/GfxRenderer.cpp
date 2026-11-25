@@ -13,6 +13,7 @@
 #include <Utf8.h>
 
 #include <algorithm>
+#include <cmath>
 
 #include "../Memory/Memory.h"
 #include "FontCacheManager.h"
@@ -1074,6 +1075,11 @@ void GfxRenderer::drawPixelDither<Color::DarkGray>(const int x, const int y) con
   drawPixel(x, y, (x + y) % 2 == 0);  // TODO: maybe find a better pattern?
 }
 
+template <>
+void GfxRenderer::drawPixelDither<Color::DarkerGray>(const int x, const int y) const {
+  drawPixel(x, y, x % 2 == 0 || y % 2 == 0);
+}
+
 void GfxRenderer::fillRectDither(const int x, const int y, const int width, const int height, Color color) const {
   switch (color) {
     case Color::Clear:
@@ -1089,6 +1095,9 @@ void GfxRenderer::fillRectDither(const int x, const int y, const int width, cons
       break;
     case Color::DarkGray:
       fillRectImpl<Color::DarkGray>(x, y, width, height);
+      break;
+    case Color::DarkerGray:
+      fillRectImpl<Color::DarkerGray>(x, y, width, height);
       break;
   }
 }
@@ -1165,7 +1174,7 @@ void GfxRenderer::fillRectImpl(const int x, const int y, const int width, const 
       }
     }
   } else {
-    // Dither (LightGray / DarkGray). Both patterns have period 2 in logical
+    // Dither (LightGray / DarkGray / DarkerGray). The patterns have period 2 in logical
     // (x, y), so per physical row we precompute one byte that represents the
     // pattern across an 8-pixel stretch — every full byte in the row uses
     // that same value.
@@ -1226,6 +1235,8 @@ void GfxRenderer::fillRectImpl(const int x, const int y, const int width, const 
         bool isBlack;
         if constexpr (C == Color::LightGray) {
           isBlack = ((lx & 1) == 0) && ((ly & 1) == 0);
+        } else if constexpr (C == Color::DarkerGray) {
+          isBlack = ((lx & 1) == 0) || ((ly & 1) == 0);
         } else {  // DarkGray
           isBlack = (((lx + ly) & 1) == 0);
         }
@@ -1262,6 +1273,7 @@ template void GfxRenderer::fillRectImpl<Color::Black>(int, int, int, int) const;
 template void GfxRenderer::fillRectImpl<Color::White>(int, int, int, int) const;
 template void GfxRenderer::fillRectImpl<Color::LightGray>(int, int, int, int) const;
 template void GfxRenderer::fillRectImpl<Color::DarkGray>(int, int, int, int) const;
+template void GfxRenderer::fillRectImpl<Color::DarkerGray>(int, int, int, int) const;
 
 void GfxRenderer::maskRoundedRectOutsideCorners(const int x, const int y, const int width, const int height,
                                                 const int radius, const Color color) const {
@@ -1292,6 +1304,11 @@ void GfxRenderer::maskRoundedRectOutsideCorners(const int x, const int y, const 
           drawPixelDither<Color::DarkGray>(x + width - 1 - dx, y + dy);               // top-right
           drawPixelDither<Color::DarkGray>(x + dx, y + height - 1 - dy);              // bottom-left
           drawPixelDither<Color::DarkGray>(x + width - 1 - dx, y + height - 1 - dy);  // bottom-right
+        } else if (color == Color::DarkerGray) {
+          drawPixelDither<Color::DarkerGray>(x + dx, y + dy);
+          drawPixelDither<Color::DarkerGray>(x + width - 1 - dx, y + dy);
+          drawPixelDither<Color::DarkerGray>(x + dx, y + height - 1 - dy);
+          drawPixelDither<Color::DarkerGray>(x + width - 1 - dx, y + height - 1 - dy);
         }
       }
     }
@@ -1331,7 +1348,7 @@ void GfxRenderer::fillArc(const int maxRadius, const int cx, const int cy, const
     } else if constexpr (color == Color::White) {
       fillRect(x0, py, width, 1, false);
     } else {
-      // LightGray / DarkGray: use existing dithered fill path.
+      // Dither colors: use the existing dithered fill path.
       fillRectDither(x0, py, width, 1, color);
     }
   }
@@ -1390,6 +1407,9 @@ void GfxRenderer::fillRoundedRect(const int x, const int y, const int width, con
       case Color::DarkGray:
         fillArc<Color::DarkGray>(maxRadius, cx, cy, xDir, yDir);
         break;
+      case Color::DarkerGray:
+        fillArc<Color::DarkerGray>(maxRadius, cx, cy, xDir, yDir);
+        break;
     }
   };
 
@@ -1408,6 +1428,49 @@ void GfxRenderer::fillRoundedRect(const int x, const int y, const int width, con
   if (roundBottomLeft) {
     fillArcTemplated(maxRadius, x + maxRadius, y + height - maxRadius - 1, -1, 1, color);
   }
+}
+
+namespace {
+// Calls span(dx, dy, width) for each row run of the ring between a circle of
+// diameter d and one of diameter d - 2 * thickness inside it, relative to the
+// square's top-left. A thickness of d / 2 or more gives a solid disc.
+template <typename Span>
+void forEachCircleSpan(const int d, const int thickness, Span span) {
+  const float outer = static_cast<float>(d) / 2.0f;
+  const float inner = outer - static_cast<float>(thickness);
+  const auto half = [](const float r, const float dy) {
+    const float h2 = r * r - dy * dy;
+    return h2 > 0.0f ? std::sqrt(h2) : -1.0f;
+  };
+  for (int row = 0; row < d; ++row) {
+    const float dy = static_cast<float>(row) + 0.5f - outer;
+    const float ho = half(outer, dy);
+    if (ho < 0.0f) continue;
+    const int x0 = static_cast<int>(std::lround(outer - ho));
+    const int x1 = static_cast<int>(std::lround(outer + ho));  // exclusive
+    if (x1 <= x0) continue;
+    const float hi = inner > 0.0f ? half(inner, dy) : -1.0f;
+    const int i0 = hi < 0.0f ? x1 : static_cast<int>(std::lround(outer - hi));
+    const int i1 = hi < 0.0f ? x1 : static_cast<int>(std::lround(outer + hi));
+    if (i0 >= i1) {
+      span(x0, row, x1 - x0);
+    } else {
+      if (i0 > x0) span(x0, row, i0 - x0);
+      if (x1 > i1) span(i1, row, x1 - i1);
+    }
+  }
+}
+}  // namespace
+
+void GfxRenderer::fillCircle(const int x, const int y, const int diameter, const Color color) const {
+  drawCircle(x, y, diameter, diameter, color);
+}
+
+void GfxRenderer::drawCircle(const int x, const int y, const int diameter, const int lineWidth,
+                             const Color color) const {
+  if (diameter <= 0 || lineWidth <= 0 || color == Color::Clear) return;
+  forEachCircleSpan(diameter, lineWidth,
+                    [&](const int dx, const int dy, const int w) { fillRectDither(x + dx, y + dy, w, 1, color); });
 }
 
 void GfxRenderer::drawImage(const uint8_t bitmap[], const int x, const int y, const int width, const int height) const {
