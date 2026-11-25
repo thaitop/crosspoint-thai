@@ -5,10 +5,11 @@
 #include <ThaiWordBreak.h>
 #include <gtest/gtest.h>
 
-#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "test/ScopedTempDir.h"
 
 namespace {
 
@@ -197,7 +198,8 @@ TEST(ClippingAnchors, NfcFocusSegmentsKeepOriginalOffsets) {
 TEST(ClippingAnchors, NfcHyphenationMarksSurviveCacheRoundTrip) {
   Hyphenator::setPreferredLanguage("en");
   GfxRenderer renderer;
-  const auto path = (std::filesystem::temp_directory_path() / "crosspoint-nfc-hyphens.bin").string();
+  const ScopedTempDir tempDir;
+  const auto path = tempDir.path() / "nfc-hyphens.bin";
   for (const bool focus : {false, true}) {
     BlockStyle style;
     style.textIndentDefined = true;
@@ -227,7 +229,6 @@ TEST(ClippingAnchors, NfcHyphenationMarksSurviveCacheRoundTrip) {
     EXPECT_EQ(previousEnd, 110u);
     EXPECT_GT(hyphens, 0u);
   }
-  std::filesystem::remove(path);
 }
 
 TEST(ClippingAnchors, DenseNfdHangulSurvivesChunkRetirement) {

@@ -89,16 +89,19 @@ python fontconvert.py ubuntu_8_regular 8 \
   --additional-intervals 0x05D0,0x05EA "${ARABIC_INTERVALS[@]}" "${THAI_INTERVALS[@]}" \
   --glyph-x-nudge 0x31,16 > ../builtinFonts/ubuntu_8_regular.h
 
-# 2-bit sources for the UI faces on boards with a UI scale above 1, where
-# GfxRenderer scales them at runtime (ScaledFont). Their grey edge levels keep
-# stem widths even after scaling; the 1-bit faces stay for unscaled boards.
-# The Regular faces take Ubuntu and Noto Sans Thai Medium so scaled UI text
-# keeps solid stems. Ubuntu Medium has too many kerning classes for the font
-# format, so its kerning is kept for Latin, punctuation and Thai only. The
-# other fallbacks (Hebrew, Arabic, Vietnamese) have no Medium cut here and
+# 2-bit UI faces for boards with a UI scale above 1. Compressed 8, 10 and 12 pt
+# faces are sources GfxRenderer scales at runtime (ScaledFont) for a scale with
+# no native faces. The uncompressed 12, 15 and 18 pt faces are the 8, 10 and
+# 12 pt UI sizes at 1.5x, drawn as they are on boards with that scale: UI text
+# has no page prewarm, so compressed faces would decompress a group per glyph.
+# The Regular faces take Ubuntu and Noto Sans Thai Medium so UI text keeps
+# solid stems on gray UI frames. Ubuntu Medium has too many kerning classes for
+# the font format, so its kerning is kept for Latin, punctuation and Thai only.
+# The other fallbacks (Hebrew, Arabic, Vietnamese) have no Medium cut here and
 # stay Regular.
-for spec in "8 Regular" "10 Regular" "10 Bold" "12 Regular" "12 Bold"; do
-  read -r size style <<< "$spec"
+for spec in "8 Regular --compress" "10 Regular --compress" "10 Bold --compress" "12 Bold --compress" \
+            "12 Regular" "15 Regular" "15 Bold" "18 Regular" "18 Bold"; do
+  read -r size style compress <<< "$spec"
   font_name="ubuntu_${size}_$(echo $style | tr '[:upper:]' '[:lower:]')_2bit"
   weight=$style
   kern_args=()
@@ -113,7 +116,7 @@ for spec in "8 Regular" "10 Regular" "10 Bold" "12 Regular" "12 Bold"; do
     ../builtinFonts/source/NotoSansArabic/NotoSansArabic-${style}.ttf \
     ../builtinFonts/source/NotoSansThai/NotoSansThai-${weight}.ttf \
     ../builtinFonts/source/Ubuntu/Ubuntu-Vietnamese-${style}.ttf \
-    --2bit --compress --additional-intervals 0x05D0,0x05EA "${ARABIC_INTERVALS[@]}" "${THAI_INTERVALS[@]}" \
+    --2bit $compress --additional-intervals 0x05D0,0x05EA "${ARABIC_INTERVALS[@]}" "${THAI_INTERVALS[@]}" \
     "${kern_args[@]}" > ../builtinFonts/${font_name}.h
   echo "Generated ../builtinFonts/${font_name}.h"
 done

@@ -1,5 +1,6 @@
 #include "LyraTheme.h"
 
+#include <FreeInkUIGfxRenderer.h>
 #include <GfxRenderer.h>
 #include <HalGPIO.h>
 #include <HalPowerManager.h>
@@ -8,6 +9,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -31,9 +33,7 @@ namespace {
 constexpr int hPaddingInSelection = 8;
 constexpr int cornerRadius = 6;
 constexpr int topHintButtonY = 345;
-constexpr int maxListValueWidth = 200;
 constexpr int mainMenuIconSize = 32;
-constexpr int mainMenuColumns = 2;
 int coverWidth = 0;
 
 const uint8_t* iconForName(UIIcon icon) {
@@ -187,7 +187,7 @@ void LyraTheme::drawSideButtonHints(const GfxRenderer& renderer, const char* top
 
 void LyraTheme::drawRecentBookCover(GfxRenderer& renderer, Rect rect, const std::vector<RecentBook>& recentBooks,
                                     const int selectorIndex, bool& coverRendered, bool& coverBufferStored,
-                                    bool& bufferRestored, std::function<bool()> storeCoverBuffer) const {
+                                    bool& bufferRestored, std::function<bool()> storeCoverBuffer, int progress) const {
   const int tileWidth = rect.width - 2 * LyraMetrics::values.contentSidePadding;
   const int tileHeight = rect.height;
   const int tileY = rect.y;
@@ -263,9 +263,17 @@ void LyraTheme::drawRecentBookCover(GfxRenderer& renderer, Rect rect, const std:
 
     auto author = renderer.truncatedText(UI_10_FONT_ID, book.author.c_str(), textWidth);
     const int titleLineHeight = renderer.getLineHeight(UI_12_FONT_ID);
+    const int smallLineHeight = renderer.getLineHeight(UI_10_FONT_ID);
     const int titleBlockHeight = titleLineHeight * static_cast<int>(titleLines.size());
-    const int authorHeight = book.author.empty() ? 0 : (renderer.getLineHeight(UI_10_FONT_ID) * 3 / 2);
-    const int totalBlockHeight = titleBlockHeight + authorHeight;
+    const int authorHeight = book.author.empty() ? 0 : smallLineHeight * 3 / 2;
+    constexpr int progressGap = 12;
+    // The progress row of the cover grid's book card: the percentage, then
+    // the bar on the same line.
+    constexpr int labelGap = 8;
+    constexpr int barHeight = 6;
+    const bool showProgress = progress >= 0 && textWidth > renderer.getTextWidth(UI_10_FONT_ID, "100%") + labelGap;
+    const int progressHeight = showProgress ? progressGap + smallLineHeight : 0;
+    const int totalBlockHeight = titleBlockHeight + authorHeight + progressHeight;
     int titleY = tileY + tileHeight / 2 - totalBlockHeight / 2;
     const int textX = tileX + hPaddingInSelection + coverWidth + LyraMetrics::values.verticalSpacing;
     for (const auto& line : titleLines) {
@@ -273,8 +281,28 @@ void LyraTheme::drawRecentBookCover(GfxRenderer& renderer, Rect rect, const std:
       titleY += titleLineHeight;
     }
     if (!book.author.empty()) {
-      titleY += renderer.getLineHeight(UI_10_FONT_ID) / 2;
+      titleY += smallLineHeight / 2;
       renderer.drawText(UI_10_FONT_ID, textX, titleY, author.c_str(), true);
+      titleY += smallLineHeight;
+    }
+    if (showProgress) {
+      const int progressY = titleY + progressGap;
+      char label[12];
+      snprintf(label, sizeof(label), "%d%%", progress);
+      renderer.drawText(UI_10_FONT_ID, textX, progressY, label, true);
+      const int barX = textX + renderer.getTextWidth(UI_10_FONT_ID, label) + labelGap;
+      const int barY = progressY + (smallLineHeight - barHeight) / 2;
+      // Its gray track would vanish on the selection box's gray, so a selected
+      // tile gets a white one.
+      namespace fui = freeink::ui;
+      fui::GfxRendererFrame<1> ui(renderer, UI_10_FONT_ID);
+      fui::ProgressBarProps bar;
+      bar.value = progress;
+      bar.track = bookSelected ? fui::Paint::solid(fui::Color::White) : fui::Paint::dither(fui::Color::LightGray);
+      fui::progressBar(ui.frame,
+                       fui::Rect{static_cast<int16_t>(barX), static_cast<int16_t>(barY),
+                                 static_cast<int16_t>(textX + textWidth - barX), static_cast<int16_t>(barHeight)},
+                       bar);
     }
   } else {
     drawEmptyRecents(renderer, rect);
