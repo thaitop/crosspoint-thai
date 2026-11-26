@@ -1,12 +1,12 @@
 name: Deploy Web Flasher
 
-# Publish web-flasher/ with the latest th-* release firmware to GitHub Pages.
-# Browsers cannot fetch release assets directly (no CORS), so the bins are
-# served from Pages next to the manifests.
+# Publish web-flasher/ with the latest stable th-* release firmware to GitHub
+# Pages. Browsers cannot fetch release assets directly (no CORS), so the bins
+# are served from Pages next to the manifests. release-thai.yml calls this
+# after it has attached every device's firmware.
 
 on:
-  release:
-    types: [published]
+  workflow_call:
   workflow_dispatch:
 
 permissions:
@@ -18,7 +18,6 @@ concurrency:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'th-')
     runs-on: ubuntu-latest
     steps:
       # Site files come from the default branch, so a th-* tag on any branch
@@ -31,13 +30,9 @@ jobs:
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
-          EVENT_TAG: ${{ github.event.release.tag_name }}
         run: |
-          tag="$EVENT_TAG"
-          if [ -z "$tag" ]; then
-            tag="$(gh release list -R "$GITHUB_REPOSITORY" --exclude-drafts --exclude-pre-releases \
-              --json tagName -q '[.[] | select(.tagName | startswith("th-"))][0].tagName')"
-          fi
+          tag="$(gh release list -R "$GITHUB_REPOSITORY" --exclude-drafts --exclude-pre-releases \
+            --json tagName -q '[.[] | select(.tagName | startswith("th-"))][0].tagName')"
           test -n "$tag"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
@@ -47,15 +42,11 @@ jobs:
           TAG: ${{ steps.release.outputs.tag }}
         run: |
           mkdir -p _site/images
-          cp web-flasher/index.html web-flasher/style.css web-flasher/flasher.js web-flasher/favicon.svg web-flasher/*.json _site/
+          cp web-flasher/index.html web-flasher/style.css web-flasher/flasher.js web-flasher/partitions.js web-flasher/favicon.svg web-flasher/devices.json _site/
           cp -R web-flasher/fonts _site/
           cp docs/images/thai/*.png web-flasher/images/*.png _site/images/
           gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p '*.bin' -D _site
-          for device in x4pro eink4plus; do
-            python3 web-flasher/split_factory.py "_site/$device-firmware.factory.bin" "_site/$device"
-          done
-          rm _site/*-firmware.factory.bin _site/eink4plus-firmware.bin
-          sed -i "s/\"version\": \"dev\"/\"version\": \"$TAG\"/" _site/x4pro.json _site/eink4plus.json
+          python3 web-flasher/assemble.py _site "$TAG"
 
       - name: Check site
         run: python3 web-flasher/check_site.py _site

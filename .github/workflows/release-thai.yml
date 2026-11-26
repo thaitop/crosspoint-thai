@@ -1,0 +1,164 @@
+name: Compile Thai Release
+
+# Build every device's firmware for a th-* release, attach it, and redeploy
+# the web flasher when this is the latest stable th-* release.
+# E-Ink4-Plus lives on thai-eink4plus (newer pioarduino platform and core), so
+# its row builds that branch's tip; publish records the commit in the notes.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing th-* release to (re)build
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-thai-${{ inputs.tag || github.event.release.tag_name }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ inputs.tag || github.event.release.tag_name }}
+
+jobs:
+  build:
+    if: startsWith(inputs.tag || github.event.release.tag_name, 'th-')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { id: x4pro, env: x4pro-gh_release, ref: tag, core: 6.1.19 }
+          - { id: eink4plus, env: metalio_eink4_plus, ref: thai-eink4plus, core: 6.2.0 }
+          - { id: x3-x4, env: gh_release, ref: tag, core: 6.1.19 }
+          - { id: x4c, env: x4c-gh_release, ref: tag, core: 6.1.19 }
+          - { id: sticky, env: sticky-gh_release, ref: tag, core: 6.1.19 }
+          - { id: papermono, env: papermono-gh_release, ref: tag, core: 6.1.19 }
+          - { id: metalio_eink4, env: metalio_eink4-gh_release, ref: tag, core: 6.1.19 }
+          - { id: eego_a4, env: eego_a4-gh_release, ref: tag, core: 6.1.19 }
+          - { id: picco, env: picco-gh_release, ref: tag, core: 6.1.19 }
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.ref == 'tag' && env.TAG || matrix.ref }}
+          submodules: recursive
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: false
+
+      - name: Install PlatformIO Core
+        run: |
+          uv pip install --system -U "https://github.com/pioarduino/platformio-core/archive/refs/tags/v${{ matrix.core }}.zip"
+          # Same explicit platform deps as release.yml (penv bootstrap is unreliable on runners).
+          uv pip install --system -U "littlefs-python>=0.16.0" "fatfs-ng>=0.1.14" "pyyaml>=6.0.2" \
+            "rich-click>=1.8.6" "zopfli>=0.2.2" "intelhex>=2.3.0" "rich>=14.0.0" "urllib3<2" \
+            "cryptography>=45.0.3" "certifi>=2025.8.3" "ecdsa>=0.19.1" "bitstring>=4.3.1" \
+            "reedsolo>=1.5.3,<1.8" "esp-idf-size>=2.0.0" "esp-coredump>=1.14.0"
+
+      - name: Pin pioarduino core inside the platform penv
+        run: |
+          set -euo pipefail
+          # Keep the nested penv core on the outer core's version.
+          # See https://github.com/pioarduino/platform-espressif32/issues/529
+          pio pkg install -e "${{ matrix.env }}"
+          uv pip install --python ~/.platformio/penv/bin/python "pioarduino==${{ matrix.core }}"
+          ~/.platformio/penv/bin/pio --version
+
+      - name: Build firmware
+        env:
+          FREEINK_LCP_RELEASE_KEY: ${{ secrets.FREEINK_LCP_RELEASE_KEY }}
+        run: |
+          if [ -n "$FREEINK_LCP_RELEASE_KEY" ]; then
+            export PLATFORMIO_BUILD_FLAGS="-DFREEINK_LCP_RELEASE_KEY=\\\"$FREEINK_LCP_RELEASE_KEY\\\""
+          fi
+          CROSSPOINT_RC_HASH="$(git rev-parse --short=7 HEAD)" pio run -e "${{ matrix.env }}" -j1
+
+      - name: Prepare assets
+        env:
+          ID: ${{ matrix.id }}
+          BUILD: .pio/build/${{ matrix.env }}
+        run: |
+          set -euo pipefail
+          mkdir out
+          cp "$BUILD/firmware.bin" "out/$ID-firmware.bin"
+          # Picco installs app-only; its factory image would overwrite the vendor bootloader.
+          if [ "$ID" != picco ]; then
+            cp "$BUILD/firmware.factory.bin" "out/$ID-firmware.factory.bin"
+          fi
+          if [ "$ID" = eink4plus ]; then
+            git rev-parse --short HEAD > out/eink4plus-commit.txt
+          fi
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: fw-${{ matrix.id }}
+          path: out/*
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      deploy: ${{ steps.deploy.outputs.deploy }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: fw-*
+          merge-multiple: true
+
+      - name: Check every device built
+        run: |
+          set -euo pipefail
+          for id in x4pro eink4plus x3-x4 x4c sticky papermono metalio_eink4 eego_a4 picco; do
+            test -f "dist/$id-firmware.bin"
+          done
+          # 9 firmware.bin + 8 factory images (none for Picco)
+          test "$(ls dist/*.bin | wc -l)" -eq 17
+
+      - name: Attach firmware
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" dist/*.bin --repo "$GITHUB_REPOSITORY" --clobber
+          # One "E-Ink4-Plus build: <sha>" line; a rebuild replaces it.
+          plus="E-Ink4-Plus build: $(cat dist/eink4plus-commit.txt)"
+          raw="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body -q .body)"
+          body="$(grep -v '^E-Ink4-Plus build: ' <<<"$raw" || true)"
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes "$body"$'\n\n'"$plus"
+
+      - name: Decide deploy
+        id: deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The site serves the latest stable th-* release only.
+          latest="$(gh release list -R "$GITHUB_REPOSITORY" --exclude-drafts --exclude-pre-releases \
+            --json tagName -q '[.[] | select(.tagName | startswith("th-"))][0].tagName')"
+          echo "deploy=$([ "$latest" = "$TAG" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  pages:
+    needs: publish
+    if: needs.publish.outputs.deploy == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages-flasher.yml

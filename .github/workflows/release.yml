@@ -12,6 +12,8 @@ permissions:
 
 jobs:
   build-release:
+    # th-* releases (Thai fork) are built by release-thai.yml.
+    if: startsWith(github.event.release.tag_name, 'v')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
