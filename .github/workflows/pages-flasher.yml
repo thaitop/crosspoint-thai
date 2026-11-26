@@ -49,7 +49,7 @@ jobs:
           mkdir -p _site/images
           cp web-flasher/index.html web-flasher/style.css web-flasher/flasher.js web-flasher/favicon.svg web-flasher/*.json _site/
           cp -R web-flasher/fonts _site/
-          cp docs/images/thai/*.png _site/images/
+          cp docs/images/thai/*.png web-flasher/images/*.png _site/images/
           gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p '*.bin' -D _site
           for device in x4pro eink4plus; do
             python3 web-flasher/split_factory.py "_site/$device-firmware.factory.bin" "_site/$device"

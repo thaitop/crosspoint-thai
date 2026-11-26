@@ -520,6 +520,20 @@ code {
 .device-top {
   padding: clamp(24px, 3vw, 40px);
   border-bottom: 1px dashed var(--primary);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 24px;
+  align-content: start;
+}
+.device-top > * {
+  grid-column: 1;
+}
+.device-top > .device-photo {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  height: clamp(96px, 11vw, 136px);
+  width: auto;
 }
 .device h3 {
   font: 600 1.875rem/1.33 var(--text);
@@ -802,6 +816,13 @@ details.sd ol li + li {
 }
 
 @media (max-width: 640px) {
+  .device-top > .device-photo {
+    grid-row: 1 / span 2;
+    height: 84px;
+  }
+  .device-top > p:last-child {
+    grid-column: 1 / -1;
+  }
   .masthead nav a:not(:last-child) {
     display: none;
   }

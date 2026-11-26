@@ -18,6 +18,8 @@ IMAGES = [
     "reader-thai.png",
     "settings-thai.png",
     "sleep-thai-calendar.png",
+    "x4-pro.png",
+    "ink4-plus.png",
 ]
 MIN_BIN_BYTES = 1_000_000
 # The flash is written in two parts that skip NVS, so the device secret
