@@ -261,7 +261,9 @@ bool CrossPointSettings::fromJson(JsonVariantConst doc) {
   longPressMenuFunction = clamp(doc["longPressMenuFunction"] | (uint8_t)LP_MENU_DISABLED,
                                 (uint8_t)LONG_PRESS_MENU_FUNCTION_COUNT, (uint8_t)LP_MENU_DISABLED);
   shortPwrBtn = clamp(doc["shortPwrBtn"] | (uint8_t)IGNORE, (uint8_t)SHORT_PWRBTN_COUNT, (uint8_t)IGNORE);
-  uiTheme = clamp(doc["uiTheme"] | (uint8_t)LYRA, (uint8_t)UI_THEME_COUNT, (uint8_t)LYRA);
+  // A missing or invalid key keeps the board default seeded in main.cpp.
+  const uint8_t themeDefault = uiTheme;
+  uiTheme = clamp(doc["uiTheme"] | themeDefault, (uint8_t)UI_THEME_COUNT, themeDefault);
   if (BoardConfig::hasHomeKey() && doc["homeButtonLongPressAction"].isNull() &&
       !doc["longPressMenuFunction"].isNull()) {
     static constexpr HomeButtonAction LEGACY[] = {HomeButtonAction::Sync,       HomeButtonAction::Ignore,
