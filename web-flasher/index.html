@@ -6,7 +6,7 @@
     <title>CrossPoint ภาษาไทย · ติดตั้งเฟิร์มแวร์ในคลิกเดียว</title>
     <meta
       name="description"
-      content="ติดตั้งเฟิร์มแวร์ CrossPoint ภาษาไทยลง Xteink X4 Pro และ Metalio E-Ink4-Plus จาก browser ได้ในคลิกเดียว"
+      content="ติดตั้งเฟิร์มแวร์ CrossPoint ภาษาไทยลง e-reader ทุกรุ่นที่ CrossPoint รองรับ จาก browser ได้ในคลิกเดียว"
     />
     <meta name="theme-color" content="#fcfaf5" />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -40,8 +40,8 @@
             <mark class="nb">ได้ถูกต้อง</mark> <span class="nb">ทุกวรรณยุกต์</span>
           </h1>
           <p class="lead">
-            เฟิร์มแวร์ CrossPoint ฉบับภาษาไทย สำหรับ Xteink X4 Pro และ Metalio <span class="nb">E-Ink4-Plus</span>
-            เสียบสาย USB แล้วกดติดตั้งจาก browser ได้เลย ไม่ต้องลงโปรแกรม
+            เฟิร์มแวร์ CrossPoint ฉบับภาษาไทย สำหรับทุกรุ่นที่ CrossPoint รองรับ ทั้ง Xteink, Metalio, Seeed,
+            <span class="nb">M5Stack</span>, EEGO และ Onyx เสียบสาย USB แล้วกดติดตั้งจาก browser ได้เลย ไม่ต้องลงโปรแกรม
           </p>
           <div class="hero-actions">
             <a class="btn btn-lg" href="#install">
@@ -121,30 +121,123 @@
 
           <ol class="steps">
             <li><strong>เสียบสาย USB-C</strong>ต่อเครื่องกับคอมพิวเตอร์ แล้วเปิดเครื่อง</li>
-            <li><strong>กดปุ่มติดตั้ง</strong>ของรุ่นที่คุณมีด้านล่าง</li>
+            <li><strong>เลือกเครื่องแล้วกดติดตั้ง</strong>เลือกผู้ผลิต แล้วเลือกรุ่นที่ตรงกับเครื่องของคุณด้านล่าง</li>
             <li><strong>เลือกพอร์ตแล้วรอ</strong>ประมาณ 1–2 นาที ห้ามถอดสายระหว่างนั้น</li>
           </ol>
 
+          <fieldset class="picker">
+            <legend>ผู้ผลิต</legend>
+            <div class="picker-grid picker-brands">
+              <label class="pick pick-brand">
+                <input type="radio" name="brand" value="xteink" />
+                <img class="pick-logo" src="images/xteink.png" alt="" loading="lazy" decoding="async" />
+                <span>Xteink</span>
+              </label>
+              <label class="pick pick-brand">
+                <input type="radio" name="brand" value="m5stack" />
+                <img class="pick-logo" src="images/m5stack.png" alt="" loading="lazy" decoding="async" />
+                <span>M5Stack</span>
+              </label>
+              <label class="pick pick-brand">
+                <input type="radio" name="brand" value="seeed" />
+                <img class="pick-logo" src="images/seeed.png" alt="" loading="lazy" decoding="async" />
+                <span>Seeed</span>
+              </label>
+              <label class="pick pick-brand">
+                <input type="radio" name="brand" value="metalio" />
+                <img class="pick-logo" src="images/cloudzao.png" alt="" loading="lazy" decoding="async" />
+                <span>Metalio</span>
+              </label>
+              <label class="pick pick-brand">
+                <input type="radio" name="brand" value="eego" />
+                <img class="pick-logo" src="images/eego.png" alt="" loading="lazy" decoding="async" />
+                <span>EEGO</span>
+              </label>
+              <label class="pick pick-brand">
+                <input type="radio" name="brand" value="boox" />
+                <span class="pick-logo wordmark-text" aria-hidden="true">BOOX</span>
+                <span>BOOX</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="picker" data-picker-devices>
+            <legend>รุ่น</legend>
+            <div class="picker-grid picker-devices">
+              <label class="pick pick-device" data-brand="xteink">
+                <input type="radio" name="device" value="x4pro" />
+                <span class="pick-name"><img class="pick-mark" src="images/xteink.png" alt="" loading="lazy" decoding="async" />Xteink X4 Pro</span>
+                <span class="pick-res">480 × 800</span>
+              </label>
+              <label class="pick pick-device" data-brand="xteink">
+                <input type="radio" name="device" value="x4" />
+                <span class="pick-name"><img class="pick-mark" src="images/xteink.png" alt="" loading="lazy" decoding="async" />Xteink X4</span>
+                <span class="pick-res">480 × 800</span>
+              </label>
+              <label class="pick pick-device" data-brand="xteink">
+                <input type="radio" name="device" value="x3" />
+                <span class="pick-name"><img class="pick-mark" src="images/xteink.png" alt="" loading="lazy" decoding="async" />Xteink X3</span>
+                <span class="pick-res">528 × 792</span>
+              </label>
+              <label class="pick pick-device" data-brand="xteink">
+                <input type="radio" name="device" value="x4c" />
+                <span class="pick-name"><img class="pick-mark" src="images/xteink.png" alt="" loading="lazy" decoding="async" />Xteink X4 Classic (X4C)</span>
+                <span class="pick-res">480 × 800</span>
+              </label>
+              <label class="pick pick-device" data-brand="m5stack">
+                <input type="radio" name="device" value="papermono" />
+                <span class="pick-name"><img class="pick-mark" src="images/m5stack.png" alt="" loading="lazy" decoding="async" />M5Stack Paper Mono</span>
+                <span class="pick-res">480 × 800</span>
+              </label>
+              <label class="pick pick-device" data-brand="seeed">
+                <input type="radio" name="device" value="sticky" />
+                <span class="pick-name"><img class="pick-mark" src="images/seeed.png" alt="" loading="lazy" decoding="async" />Seeed Sticky</span>
+                <span class="pick-res">480 × 800</span>
+              </label>
+              <label class="pick pick-device" data-brand="metalio">
+                <input type="radio" name="device" value="metalio_eink4" />
+                <span class="pick-name"><img class="pick-mark" src="images/cloudzao.png" alt="" loading="lazy" decoding="async" />Metalio E-Ink 4</span>
+                <span class="pick-res">480 × 800</span>
+              </label>
+              <label class="pick pick-device" data-brand="metalio">
+                <input type="radio" name="device" value="eink4plus" />
+                <span class="pick-name"><img class="pick-mark" src="images/cloudzao.png" alt="" loading="lazy" decoding="async" />Metalio E-Ink4-Plus</span>
+                <span class="pick-res">684 × 1216</span>
+              </label>
+              <label class="pick pick-device" data-brand="eego">
+                <input type="radio" name="device" value="eego_a4" />
+                <span class="pick-name"><img class="pick-mark" src="images/eego.png" alt="" loading="lazy" decoding="async" />EEGO Reader A4</span>
+                <span class="pick-res">552 × 768</span>
+              </label>
+              <label class="pick pick-device" data-brand="boox">
+                <input type="radio" name="device" value="picco" />
+                <span class="pick-name"><span class="pick-mark wordmark-text" aria-hidden="true">BOOX</span>Onyx Picco / BOOX Tiles</span>
+                <span class="pick-res">480 × 800</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <p class="picker-empty" data-picker-empty hidden>เลือกผู้ผลิตและรุ่นของเครื่องด้านบน แล้วปุ่มติดตั้งจะแสดงตรงนี้</p>
+
           <div class="devices">
-            <article class="device" aria-labelledby="x4pro-title" data-flash="x4pro.json" data-name="X4 Pro" data-chip="ESP32-S3">
+            <article class="device" id="install-x4pro" aria-labelledby="x4pro-title" data-device="x4pro" data-flash="x4pro.json" data-name="X4 Pro" data-chip="ESP32-S3" data-layout="split">
               <div class="device-top">
-                <img class="device-photo" src="images/x4-pro.png" alt="เครื่อง Xteink X4 Pro ด้านหน้าและด้านหลัง" width="1208" height="1221" loading="lazy" decoding="async" />
-                <h3 id="x4pro-title">Xteink X4 Pro</h3>
-                <p class="chip">ESP32-S3 · <span class="nb">ทดสอบบนเครื่องจริงแล้ว</span></p>
+                <h3 id="x4pro-title"><span class="nb">Xteink X4 Pro</span></h3>
+                <p class="chip">ESP32-S3 · 480 × 800</p>
                 <p>ฐาน CrossPoint 2.0.0 รุ่นเสถียร เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
               </div>
               <div class="device-body">
                 <button class="btn btn-lg" data-flash-start>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
-                    </svg>
-                    ติดตั้งลง X4 Pro
-                  </button>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง <span class="nb">X4 Pro</span>
+                </button>
                 <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
                 <details class="sd">
                   <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
                   <ol>
-                    <li>ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
                     <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
                     <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
                   </ol>
@@ -157,22 +250,261 @@
                 </details>
               </div>
             </article>
-
-            <article class="device" aria-labelledby="plus-title" data-flash="eink4plus.json" data-name="E-Ink4-Plus" data-chip="ESP32-S31">
+            <article class="device" id="install-x4" aria-labelledby="x4-title" data-device="x4" data-flash="x4.json" data-name="X4" data-chip="ESP32-C3" data-layout="split">
               <div class="device-top">
-                <img class="device-photo" src="images/ink4-plus.png" alt="เครื่อง Metalio E-Ink4-Plus ด้านหน้าและด้านหลัง" width="896" height="1308" loading="lazy" decoding="async" />
-                <h3 id="plus-title">Metalio <span class="nb">E-Ink4-Plus</span></h3>
-                <p class="chip">ESP32-S31 · <span class="nb">ทดสอบบนเครื่องจริงแล้ว</span></p>
+                <h3 id="x4-title"><span class="nb">Xteink X4</span></h3>
+                <p class="chip">ESP32-C3 · 480 × 800</p>
+                <p>Xteink X4 รุ่นแรก (ไม่ใช่ X4 Pro) เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
+              </div>
+              <div class="device-body">
+                <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง X4
+                </button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
+                  <ol>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="x3-x4-firmware.bin" download="firmware.bin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+                    </svg>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+            <article class="device" id="install-x3" aria-labelledby="x3-title" data-device="x3" data-flash="x3.json" data-name="X3" data-chip="ESP32-C3" data-layout="split">
+              <div class="device-top">
+                <h3 id="x3-title"><span class="nb">Xteink X3</span></h3>
+                <p class="chip">ESP32-C3 · 528 × 792</p>
+                <p>เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
+              </div>
+              <div class="device-body">
+                <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง X3
+                </button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
+                  <ol>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="x3-x4-firmware.bin" download="firmware.bin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+                    </svg>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+            <article class="device" id="install-x4c" aria-labelledby="x4c-title" data-device="x4c" data-flash="x4c.json" data-name="X4C" data-chip="ESP32-S3" data-layout="split">
+              <div class="device-top">
+                <h3 id="x4c-title"><span class="nb">Xteink X4 Classic (X4C)</span></h3>
+                <p class="chip">ESP32-S3 · 480 × 800</p>
+                <p>Xteink X4 รุ่น Classic เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
+              </div>
+              <div class="device-body">
+                <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง X4C
+                </button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
+                  <ol>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="x4c-firmware.bin" download="firmware.bin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+                    </svg>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+            <article class="device" id="install-papermono" aria-labelledby="papermono-title" data-device="papermono" data-flash="papermono.json" data-name="Paper Mono" data-chip="ESP32-S3" data-layout="split">
+              <div class="device-top">
+                <h3 id="papermono-title"><span class="nb">M5Stack Paper Mono</span></h3>
+                <p class="chip">ESP32-S3 · 480 × 800</p>
+                <p>จอสัมผัสและไฟหน้าจอ เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
+              </div>
+              <div class="device-body">
+                <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง <span class="nb">Paper Mono</span>
+                </button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
+                  <ol>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="papermono-firmware.bin" download="firmware.bin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+                    </svg>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+            <article class="device" id="install-sticky" aria-labelledby="sticky-title" data-device="sticky" data-flash="sticky.json" data-name="Sticky" data-chip="ESP32-S3" data-layout="split">
+              <div class="device-top">
+                <h3 id="sticky-title"><span class="nb">Seeed Sticky</span></h3>
+                <p class="chip">ESP32-S3 · 480 × 800</p>
+                <p>จอสัมผัส เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
+              </div>
+              <div class="device-body">
+                <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง Sticky
+                </button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
+                  <ol>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="sticky-firmware.bin" download="firmware.bin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+                    </svg>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+            <article class="device" id="install-metalio_eink4" aria-labelledby="metalio_eink4-title" data-device="metalio_eink4" data-flash="metalio_eink4.json" data-name="E-Ink 4" data-chip="ESP32-S3" data-layout="split">
+              <div class="device-top">
+                <h3 id="metalio_eink4-title"><span class="nb">Metalio E-Ink 4</span></h3>
+                <p class="chip">ESP32-S3 · 480 × 800</p>
+                <p>Metalio E-Ink 4 รุ่นปกติ (ไม่ใช่ Plus) เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
+              </div>
+              <div class="device-body">
+                <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง <span class="nb">E-Ink 4</span>
+                </button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
+                  <ol>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="metalio_eink4-firmware.bin" download="firmware.bin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+                    </svg>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+            <article class="device" id="install-eink4plus" aria-labelledby="eink4plus-title" data-device="eink4plus" data-flash="eink4plus.json" data-name="E-Ink4-Plus" data-chip="ESP32-S31" data-layout="split">
+              <div class="device-top">
+                <h3 id="eink4plus-title"><span class="nb">Metalio E-Ink4-Plus</span></h3>
+                <p class="chip">ESP32-S31 · 684 × 1216</p>
                 <p>จอความละเอียดสูง ไอคอนและฟอนต์เมนูคมขึ้น เมนูมีภาษาไทยและอังกฤษ</p>
               </div>
               <div class="device-body">
                 <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง <span class="nb">E-Ink4-Plus</span>
+                </button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
+                  <ol>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="eink4plus-firmware.bin" download="firmware.bin">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
                     </svg>
-                    ติดตั้งลง E-Ink4-Plus
-                  </button>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+            <article class="device" id="install-eego_a4" aria-labelledby="eego_a4-title" data-device="eego_a4" data-flash="eego_a4.json" data-name="EEGO A4" data-chip="ESP32-S3" data-layout="split">
+              <div class="device-top">
+                <h3 id="eego_a4-title"><span class="nb">EEGO Reader A4</span></h3>
+                <p class="chip">ESP32-S3 · 552 × 768</p>
+                <p>จอสัมผัส เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
+              </div>
+              <div class="device-body">
+                <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง <span class="nb">EEGO A4</span>
+                </button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD&nbsp;card</summary>
+                  <ol>
+                    <li>ใช้ได้กับเครื่องที่ลง CrossPoint ไว้แล้วเท่านั้น ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="eego_a4-firmware.bin" download="firmware.bin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+                    </svg>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+            <article class="device" id="install-picco" aria-labelledby="picco-title" data-device="picco" data-flash="picco.json" data-name="Picco" data-chip="ESP32-S3" data-layout="app-only">
+              <div class="device-top">
+                <h3 id="picco-title"><span class="nb">Onyx Picco / BOOX Tiles</span></h3>
+                <p class="chip">ESP32-S3 · 480 × 800</p>
+                <p>ติดตั้งเฉพาะตัวแอป ส่วน bootloader และโหมดกู้คืนของผู้ผลิตยังอยู่ครบ</p>
+              </div>
+              <div class="device-body">
+                <button class="btn btn-lg" data-flash-start>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                  </svg>
+                  ติดตั้งลง Picco
+                </button>
                 <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรือดาวน์โหลดไฟล์จาก <a href="https://github.com/thaitop/crosspoint-thai/releases">Releases</a></p>
+                <p class="device-note">รุ่นนี้อัปเดตผ่าน SD card ไม่ได้ ไฟล์เฟิร์มแวร์อยู่ใน <a href="https://github.com/thaitop/crosspoint-thai/releases">Releases</a></p>
               </div>
             </article>
           </div>
@@ -181,14 +513,12 @@
             <h3>หลังติดตั้งเสร็จ</h3>
             <ol>
               <li>ไปที่ Settings → General → Language แล้วเลือก <strong>ไทย</strong></li>
-              <li>ตั้งเวลาเครื่องที่ Settings → General → Clock เพื่อให้บันทึกเวลาอ่านและปฏิทินไทยทำงาน</li>
+              <li>ถ้าเครื่องมีนาฬิกา ตั้งเวลาที่ Settings → General → Clock เพื่อให้บันทึกเวลาอ่านและปฏิทินไทยทำงาน</li>
               <li>หนังสือไทยต้องใช้ฟอนต์ที่มีอักษรไทย ใส่ฟอนต์ลง SD card ตาม<a class="nb" href="https://github.com/thaitop/crosspoint-thai/blob/thai-2.0.0/docs/sd-card-fonts.md">คู่มือฟอนต์บน SD card</a></li>
             </ol>
             <div class="after-notes">
-              <p>หน้านี้รองรับเฉพาะ X4 Pro และ <span class="nb">E-Ink4-Plus</span> รุ่นอื่น เช่น Xteink X3/X4 ยังต้อง build เอง</p>
               <p>
                 Xteink บางเครื่องล็อก USB มาจากโรงงาน ดู<a class="nb" href="https://github.com/crosspoint-reader/crosspoint-reader#usb-locked-devices-xteink-unlocker">วิธีปลดล็อก</a>
-                อยากกลับไปใช้เฟิร์มแวร์เดิม ใช้ <a class="nb" href="https://crosspointreader.com/install">web flasher ของ CrossPoint</a>
               </p>
             </div>
           </div>
@@ -196,9 +526,26 @@
       </section>
     </main>
 
+    <section class="disclaimer" aria-labelledby="disclaimer-title">
+      <div class="wrap">
+        <h2 id="disclaimer-title">ข้อควรทราบ</h2>
+        <ul>
+          <li>เฟิร์มแวร์นี้แจกให้ใช้ตามสภาพ ไม่มีการรับประกันใดๆ การติดตั้งเป็นความรับผิดชอบของผู้ใช้เอง</li>
+          <li>
+            ผู้พัฒนาไม่ได้มีเครื่องทุกรุ่น บางรุ่นจึงยังไม่ได้ลองบนเครื่องจริง ถ้าเจอปัญหา แจ้งได้ที่
+            <a class="nb" href="https://github.com/thaitop/crosspoint-thai/issues">GitHub Issues</a> พร้อมบอกรุ่นของเครื่อง
+          </li>
+          <li>
+            ถ้าอยากกลับไปใช้เฟิร์มแวร์เดิม ใช้ <a class="nb" href="https://crosspointreader.com/install">web flasher ของ CrossPoint</a>
+            หรือโปรแกรมของผู้ผลิต
+          </li>
+        </ul>
+      </div>
+    </section>
+
     <footer class="colophon">
       <div class="wrap">
-        <p>โปรเจกต์ open source ไม่มีส่วนเกี่ยวข้องกับ Xteink, Metalio หรือผู้ผลิตรายใด และไม่ใช่รุ่นทางการของ CrossPoint</p>
+        <p>โปรเจกต์ open source ไม่มีส่วนเกี่ยวข้องกับ Xteink, Metalio, Seeed, M5Stack, EEGO, Onyx หรือผู้ผลิตรายใด และไม่ใช่รุ่นทางการของ CrossPoint</p>
         <nav aria-label="ลิงก์ท้ายหน้า">
           <a href="https://github.com/thaitop/crosspoint-thai">ซอร์สโค้ด</a>
           <a href="https://github.com/thaitop/crosspoint-thai/releases">Releases ทั้งหมด</a>

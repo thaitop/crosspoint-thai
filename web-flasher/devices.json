@@ -1,0 +1,12 @@
+[
+  {"id": "x4pro", "build": "x4pro", "brand": "xteink", "name": "Xteink X4 Pro", "short": "X4 Pro", "resolution": "480 × 800", "chip": "ESP32-S3", "layout": "split", "sd_update": true},
+  {"id": "x4", "build": "x3-x4", "brand": "xteink", "name": "Xteink X4", "short": "X4", "resolution": "480 × 800", "chip": "ESP32-C3", "layout": "split", "sd_update": true},
+  {"id": "x3", "build": "x3-x4", "brand": "xteink", "name": "Xteink X3", "short": "X3", "resolution": "528 × 792", "chip": "ESP32-C3", "layout": "split", "sd_update": true},
+  {"id": "x4c", "build": "x4c", "brand": "xteink", "name": "Xteink X4 Classic (X4C)", "short": "X4C", "resolution": "480 × 800", "chip": "ESP32-S3", "layout": "split", "sd_update": true},
+  {"id": "papermono", "build": "papermono", "brand": "m5stack", "name": "M5Stack Paper Mono", "short": "Paper Mono", "resolution": "480 × 800", "chip": "ESP32-S3", "layout": "split", "sd_update": true},
+  {"id": "sticky", "build": "sticky", "brand": "seeed", "name": "Seeed Sticky", "short": "Sticky", "resolution": "480 × 800", "chip": "ESP32-S3", "layout": "split", "sd_update": true},
+  {"id": "metalio_eink4", "build": "metalio_eink4", "brand": "metalio", "name": "Metalio E-Ink 4", "short": "E-Ink 4", "resolution": "480 × 800", "chip": "ESP32-S3", "layout": "split", "sd_update": true},
+  {"id": "eink4plus", "build": "eink4plus", "brand": "metalio", "name": "Metalio E-Ink4-Plus", "short": "E-Ink4-Plus", "resolution": "684 × 1216", "chip": "ESP32-S31", "layout": "split", "sd_update": true},
+  {"id": "eego_a4", "build": "eego_a4", "brand": "eego", "name": "EEGO Reader A4", "short": "EEGO A4", "resolution": "552 × 768", "chip": "ESP32-S3", "layout": "split", "sd_update": true},
+  {"id": "picco", "build": "picco", "brand": "boox", "name": "Onyx Picco / BOOX Tiles", "short": "Picco", "resolution": "480 × 800", "chip": "ESP32-S3", "layout": "app-only", "sd_update": false}
+]

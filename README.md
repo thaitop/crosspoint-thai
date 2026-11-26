@@ -5,14 +5,14 @@ CrossPoint Thai คือ fork ของ [CrossPoint Reader](https://github.com/
 พร้อมเมนูภาษาไทย ธีมหน้า Home แบบใหม่ บันทึกเวลาอ่าน และหน้าจอพักแบบปฏิทินไทย
 
 **ติดตั้งในคลิกเดียว:** [thaitop.github.io/crosspoint-thai](https://thaitop.github.io/crosspoint-thai/)
-(Xteink X4 Pro และ Metalio E-Ink4-Plus)
+(ทุกรุ่นที่ CrossPoint รองรับ)
 
 ฟีเจอร์อื่นทั้งหมดมาจาก CrossPoint ต้นฉบับ (EPUB, ฟอนต์บน SD card, Wi-Fi, OPDS,
 KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้ที่
 [README ของ upstream](https://github.com/crosspoint-reader/crosspoint-reader#readme)
 และ [User Guide](./USER_GUIDE.md)
 
-> โปรเจกต์นี้ไม่มีส่วนเกี่ยวข้องกับ Xteink, Metalio หรือผู้ผลิตอุปกรณ์รายใด
+> โปรเจกต์นี้ไม่มีส่วนเกี่ยวข้องกับ Xteink, Metalio, Seeed, M5Stack, EEGO, Onyx หรือผู้ผลิตอุปกรณ์รายใด
 > และไม่ใช่รุ่นทางการของ CrossPoint
 
 ---
@@ -116,19 +116,29 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 ถ้าไม่ได้ build เอง ให้ติดตั้ง[ผ่านหน้าเว็บ](#ผ่านหน้าเว็บ-แนะนำ) ไม่ต้องโหลดไฟล์
 
 ไฟล์เฟิร์มแวร์ที่ build แล้วอยู่ที่หน้า [Releases](https://github.com/thaitop/crosspoint-thai/releases)
-แต่ละ release มีไฟล์ของทั้งสองเครื่อง เลือกตามชื่อไฟล์:
+แต่ละ release มีไฟล์ของทุกรุ่น ชื่อไฟล์ขึ้นต้นด้วยรหัสรุ่น:
 
-| ไฟล์ | อุปกรณ์ | ใช้ทำอะไร |
-| --- | --- | --- |
-| `x4pro-firmware.bin` | Xteink X4 Pro | อัปเดตผ่าน SD card |
-| `x4pro-firmware.factory.bin` | Xteink X4 Pro | flash ผ่าน USB ที่ offset 0x0 \* |
-| `eink4plus-firmware.bin` | Metalio E-Ink4-Plus | flash ผ่าน USB ที่ offset 0x10000 |
-| `eink4plus-firmware.factory.bin` | Metalio E-Ink4-Plus | flash ผ่าน USB ที่ offset 0x0 \* |
+| รหัส | อุปกรณ์ |
+| --- | --- |
+| `x4pro` | Xteink X4 Pro |
+| `eink4plus` | Metalio E-Ink4-Plus |
+| `x3-x4` | Xteink X3 / X4 |
+| `x4c` | Xteink X4 Classic (X4C) |
+| `sticky` | Seeed Sticky |
+| `papermono` | M5Stack Paper Mono |
+| `metalio_eink4` | Metalio E-Ink 4 |
+| `eego_a4` | EEGO Reader A4 |
+| `picco` | Onyx Picco / BOOX Tiles |
+
+| ไฟล์ | ใช้ทำอะไร |
+| --- | --- |
+| `<รหัส>-firmware.bin` | อัปเดตผ่าน SD card หรือ flash ผ่าน USB ที่ offset 0x10000 (Picco: 0xE0000) |
+| `<รหัส>-firmware.factory.bin` | flash ผ่าน USB ที่ offset 0x0 \* (ไม่มีของ Picco) |
 
 \* ไฟล์ `factory.bin` เขียนทับพื้นที่ NVS ด้วย จึงล้างข้อมูลที่เครื่องเก็บไว้
 เช่น รหัสเครื่องที่ใช้เปิดหนังสือที่มีการป้องกัน หน้าเว็บติดตั้งจะข้ามพื้นที่นี้ให้
 
-บอร์ดอื่นต้อง build เอง
+Picco ต้องไม่ flash ที่ offset 0x0 เพราะจะเขียนทับ bootloader และโหมดกู้คืนของผู้ผลิต
 
 ---
 
@@ -174,21 +184,19 @@ PLATFORMIO_CORE_DIR=~/.platformio-eink4plus pio run -e metalio_eink4_plus
 
 ### ผ่านหน้าเว็บ (แนะนำ)
 
-สำหรับ Xteink X4 Pro และ Metalio E-Ink4-Plus
-
 1. ต่อเครื่องเข้าคอมพิวเตอร์ด้วยสาย USB-C
 2. เปิด [thaitop.github.io/crosspoint-thai](https://thaitop.github.io/crosspoint-thai/)
    ด้วย Chrome หรือ Edge บนคอมพิวเตอร์
-3. กด **ติดตั้งลง X4 Pro** หรือ **ติดตั้งลง E-Ink4-Plus** ตามรุ่นของเครื่อง เลือกพอร์ตของเครื่อง แล้วรอจนขึ้น "ติดตั้งเสร็จแล้ว"
+3. เลือกรุ่นของเครื่อง กด **ติดตั้งลง <รุ่น>** เลือกพอร์ตของเครื่อง แล้วรอจนขึ้น "ติดตั้งเสร็จแล้ว"
    ระหว่างนี้ห้ามถอดสาย
 
 หน้าเว็บติดตั้ง release ล่าสุดเสมอ การตั้งค่าและหนังสือในเครื่องยังอยู่ครบ
 Safari, Firefox และมือถือยังใช้หน้านี้ไม่ได้ เพราะไม่มี Web Serial
 
-### ผ่าน SD card (X4 Pro)
+### ผ่าน SD card (เครื่องที่ลง CrossPoint ไว้แล้ว ยกเว้น Picco)
 
 1. คัดลอก `firmware.bin` ไปไว้ที่ root ของ SD card
-   (ถ้าโหลดจาก Releases ให้เปลี่ยนชื่อ `x4pro-firmware.bin` เป็น `firmware.bin`)
+   (ถ้าโหลดจาก Releases ให้เปลี่ยนชื่อ `<รหัส>-firmware.bin` เป็น `firmware.bin`)
 2. บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update
 
 ### ผ่าน USB
