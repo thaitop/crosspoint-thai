@@ -123,6 +123,10 @@ code {
   white-space: nowrap;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .wrap {
   width: min(1320px, 100% - 48px);
   margin-inline: auto;
@@ -536,16 +540,7 @@ code {
   gap: 24px;
   flex: 1;
 }
-esp-web-install-button {
-  display: block;
-}
-/* Until the script defines the element, every slot would show at once. */
-esp-web-install-button:not(:defined) [slot="unsupported"],
-esp-web-install-button:not(:defined) [slot="not-allowed"] {
-  display: none;
-}
-.unsupported,
-.not-allowed {
+.unsupported {
   display: block;
   background: var(--yellow-soft);
   border: 1px solid var(--primary);
@@ -627,6 +622,134 @@ details.sd ol li + li {
 }
 .after-notes p + p {
   margin-top: 12px;
+}
+
+/* Install dialog (flasher.js) */
+.flash-dialog {
+  width: min(520px, 100% - 32px);
+  padding: 0;
+  border: 1px dashed var(--primary);
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.flash-dialog::backdrop {
+  background: rgb(6 47 0 / 0.45);
+}
+.flash-dialog [data-view] {
+  padding: clamp(24px, 5vw, 40px);
+}
+.flash-dialog h2 {
+  font: 600 1.5rem/1.33 var(--text);
+  margin-bottom: 12px;
+}
+.flash-dialog p {
+  color: var(--muted);
+}
+.flash-dialog p + p {
+  margin-top: 12px;
+}
+.fd-note {
+  background: var(--yellow-soft);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+}
+.fd-actions {
+  margin-top: 28px;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.fd-steps {
+  list-style: none;
+  margin: 20px 0 24px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.fd-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+}
+.fd-step::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border: 2px solid var(--line-dashed);
+  border-radius: 9999px;
+}
+.fd-step.is-active {
+  color: var(--primary);
+  font-weight: 600;
+}
+.fd-step.is-active::before {
+  border-color: var(--primary);
+  border-top-color: transparent;
+  animation: fd-spin 0.9s linear infinite;
+}
+.fd-step.is-done::before {
+  border-color: var(--primary);
+  background: var(--primary)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23ffeb5b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 8.5 2.6 2.5L12 5.5'/%3E%3C/svg%3E")
+    center / 14px no-repeat;
+}
+.fd-pct {
+  margin-left: auto;
+  font: 400 0.9375rem/1 var(--mono);
+}
+@keyframes fd-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd-step.is-active::before {
+    animation: none;
+    border-top-color: var(--primary);
+  }
+}
+.fd-bar {
+  height: 12px;
+  border: 1px solid var(--primary);
+  border-radius: 9999px;
+  overflow: hidden;
+  background: var(--yellow-soft);
+}
+.fd-bar span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s ease-out;
+}
+.fd-warn {
+  margin-top: 16px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--primary) !important;
+}
+.fd-next {
+  margin: 16px 0 0;
+  padding-left: 1.3rem;
+  line-height: 1.7;
+}
+.fd-detail {
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.fd-detail summary {
+  cursor: pointer;
+}
+.fd-detail code {
+  display: block;
+  margin-top: 8px;
+  padding: 12px;
+  white-space: pre-wrap;
 }
 
 /* Footer */

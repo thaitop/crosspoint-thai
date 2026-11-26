@@ -12,7 +12,6 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="fonts/noto-sans-thai-thai.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="style.css" />
-    <script type="module" src="https://unpkg.com/esp-web-tools@10.5.2/dist/web/install-button.js?module"></script>
   </head>
   <body>
     <header class="masthead">
@@ -127,23 +126,20 @@
           </ol>
 
           <div class="devices">
-            <article class="device device-x4pro" aria-labelledby="x4pro-title">
+            <article class="device" aria-labelledby="x4pro-title" data-flash="x4pro.json" data-name="X4 Pro" data-chip="ESP32-S3">
               <div class="device-top">
                 <h3 id="x4pro-title">Xteink X4 Pro</h3>
                 <p class="chip">ESP32-S3 · ทดสอบบนเครื่องจริงแล้ว</p>
                 <p>ฐาน CrossPoint 2.0.0 รุ่นเสถียร เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
               </div>
               <div class="device-body">
-                <esp-web-install-button manifest="x4pro.json">
-                  <button class="btn btn-lg" slot="activate">
+                <button class="btn btn-lg" data-flash-start>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
                     </svg>
                     ติดตั้งลง X4 Pro
                   </button>
-                  <span slot="unsupported" class="unsupported">browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ หรืออัปเดตผ่าน SD card ด้านล่าง</span>
-                  <span slot="not-allowed" class="not-allowed">ต้องเปิดหน้านี้ผ่าน https จึงจะติดตั้งได้</span>
-                </esp-web-install-button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรืออัปเดตผ่าน SD card ด้านล่าง</p>
                 <details class="sd">
                   <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD card</summary>
                   <ol>
@@ -161,23 +157,20 @@
               </div>
             </article>
 
-            <article class="device device-plus" aria-labelledby="plus-title">
+            <article class="device" aria-labelledby="plus-title" data-flash="eink4plus.json" data-name="E-Ink4-Plus" data-chip="ESP32-S31">
               <div class="device-top">
                 <h3 id="plus-title">Metalio <span class="nb">E-Ink4-Plus</span></h3>
                 <p class="chip">ESP32-S31 · ทดสอบบนเครื่องจริงแล้ว</p>
                 <p>จอความละเอียดสูง ไอคอนและฟอนต์เมนูคมขึ้น เมนูมีภาษาไทยและอังกฤษ</p>
               </div>
               <div class="device-body">
-                <esp-web-install-button manifest="eink4plus.json">
-                  <button class="btn btn-lg" slot="activate">
+                <button class="btn btn-lg" data-flash-start>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
                     </svg>
                     ติดตั้งลง E-Ink4-Plus
                   </button>
-                  <span slot="unsupported" class="unsupported">browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์</span>
-                  <span slot="not-allowed" class="not-allowed">ต้องเปิดหน้านี้ผ่าน https จึงจะติดตั้งได้</span>
-                </esp-web-install-button>
+                <p class="unsupported" data-flash-unsupported hidden>browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ (ผ่าน https) หรือดาวน์โหลดไฟล์จาก <a href="https://github.com/thaitop/crosspoint-thai/releases">Releases</a></p>
               </div>
             </article>
           </div>
@@ -212,6 +205,11 @@
       </div>
     </footer>
 
+    <dialog id="flash-dialog" class="flash-dialog" aria-live="polite">
+      <div data-view></div>
+    </dialog>
+
+    <script type="module" src="flasher.js"></script>
     <script>
       fetch("x4pro.json")
         .then((r) => r.json())

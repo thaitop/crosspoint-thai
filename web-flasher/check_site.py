@@ -78,6 +78,9 @@ def check_manifest(site: Path, device: str, chip: str) -> list[str]:
 
 def check_site(site: Path) -> list[str]:
     problems = []
+    for name in ("flasher.js", "style.css"):
+        if not (site / name).is_file():
+            problems.append(f"missing {name}")
     index = site / "index.html"
     if not index.is_file():
         problems.append("missing index.html")
