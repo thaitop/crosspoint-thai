@@ -1,9 +1,10 @@
 // Thai install dialog around ESP Web Tools' flash(). flash() owns chip
 // detection, build selection, writing and reset; this file owns the UI.
-import { layoutProblem, TABLE_OFFSET, TABLE_SIZE } from "./partitions.js";
+import { layoutProblem, needsLayoutCheck, TABLE_OFFSET, TABLE_SIZE } from "./partitions.js";
 
 const FLASH_MODULE = "https://esm.sh/esp-web-tools@10.5.2/dist/flash.js?deps=esptool-js@0.7.1";
 const ESPTOOL_MODULE = "https://esm.sh/esptool-js@0.7.1";
+const TABLE_READ_TIMEOUT_MS = 15000;
 
 const dialog = document.getElementById("flash-dialog");
 const view = dialog.querySelector("[data-view]");
@@ -127,9 +128,21 @@ async function checkLayout(port, layout) {
   try {
     const loader = new ESPLoader({ transport, baudrate: 115200 });
     await loader.main();
-    const problem = layoutProblem(await loader.readFlash(TABLE_OFFSET, TABLE_SIZE), layout);
-    if (problem) await loader.after(); // nothing written: reboot into the current firmware
-    return problem;
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("partition table read timed out")), TABLE_READ_TIMEOUT_MS);
+    });
+    try {
+      const read = loader.readFlash(TABLE_OFFSET, TABLE_SIZE);
+      read.catch(() => {}); // a read left behind by the timeout fails on disconnect
+      const table = await Promise.race([read, timeout]);
+      return layoutProblem(table, layout);
+    } finally {
+      clearTimeout(timer);
+      // Leave the chip running its firmware, not the stub, so flash() starts
+      // from the same state as without this check.
+      await loader.after().catch(() => {});
+    }
   } finally {
     // After a reset the USB port may already be gone; keep the result above.
     await transport.disconnect().catch(() => {});
@@ -155,9 +168,9 @@ async function runFlash(device) {
       import(FLASH_MODULE),
       fetch(device.manifest).then((r) => r.json()),
     ]);
-    let problem;
+    let problem = null;
     try {
-      problem = await checkLayout(port, device.layout);
+      if (needsLayoutCheck(device.chip)) problem = await checkLayout(port, device.layout);
     } catch (err) {
       busy = false;
       showError(device, "failed_initialize", err && err.message);

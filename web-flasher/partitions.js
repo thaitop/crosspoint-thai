@@ -34,3 +34,10 @@ export function layoutProblem(table, layout) {
   if (layout === "app-only") return piccoApp ? null : "not_picco";
   return piccoApp ? "picco_table" : null;
 }
+
+// Picco is the only model whose layout a wrong card can destroy, and it is
+// an ESP32-S3; ESP Web Tools already rejects a card for another chip family.
+// Skipping other chips also avoids READ_FLASH, which hangs on the S31 stub.
+export function needsLayoutCheck(chip) {
+  return chip === "ESP32-S3";
+}

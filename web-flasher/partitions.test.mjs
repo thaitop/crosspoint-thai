@@ -1,7 +1,7 @@
 // Run: node --test web-flasher/
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { layoutProblem, parsePartitions, TABLE_SIZE } from "./partitions.js";
+import { layoutProblem, needsLayoutCheck, parsePartitions, TABLE_SIZE } from "./partitions.js";
 
 function table(entries) {
   const bytes = new Uint8Array(TABLE_SIZE).fill(0xff);
@@ -50,4 +50,10 @@ test("Picco install needs the Picco table", () => {
   assert.equal(layoutProblem(PICCO, "app-only"), null);
   assert.equal(layoutProblem(OURS, "app-only"), "not_picco");
   assert.equal(layoutProblem(BLANK, "app-only"), "not_picco");
+});
+
+test("only ESP32-S3 cards need the layout check", () => {
+  assert.equal(needsLayoutCheck("ESP32-S3"), true);
+  assert.equal(needsLayoutCheck("ESP32-S31"), false);
+  assert.equal(needsLayoutCheck("ESP32-C3"), false);
 });
