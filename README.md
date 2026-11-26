@@ -109,6 +109,9 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 
 ## ดาวน์โหลด
 
+**วิธีที่ง่ายที่สุด:** เปิด [thaitop.github.io/crosspoint-thai](https://thaitop.github.io/crosspoint-thai/)
+ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ แล้วกดติดตั้งในคลิกเดียว
+
 ไฟล์เฟิร์มแวร์ที่ build แล้วอยู่ที่หน้า [Releases](https://github.com/thaitop/crosspoint-thai/releases)
 แต่ละ release มีไฟล์ของทั้งสองเครื่อง เลือกตามชื่อไฟล์:
 
