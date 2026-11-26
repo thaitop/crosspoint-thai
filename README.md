@@ -14,6 +14,18 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 
 ---
 
+## ภาพหน้าจอ
+
+ภาพจาก Metalio E-Ink4-Plus
+
+| หน้า Home: Calendar | หน้า Home: Ledger | หน้า Home: Today |
+| :---: | :---: | :---: |
+| <img src="docs/images/thai/home-calendar.png" width="200" alt="หน้า Home ธีม Calendar"> | <img src="docs/images/thai/home-ledger.png" width="200" alt="หน้า Home ธีม Ledger"> | <img src="docs/images/thai/home-today.png" width="200" alt="หน้า Home ธีม Today"> |
+| **อ่านหนังสือภาษาไทย** | **เมนูภาษาไทย** | **หน้าจอพักปฏิทินไทย** |
+| <img src="docs/images/thai/reader-thai.png" width="200" alt="หน้าหนังสือภาษาไทย"> | <img src="docs/images/thai/settings-thai.png" width="200" alt="เมนูตั้งค่าภาษาไทย"> | <img src="docs/images/thai/sleep-thai-calendar.png" width="200" alt="หน้าจอพักปฏิทินไทย"> |
+
+---
+
 ## สิ่งที่เพิ่มเข้ามา
 
 ### การแสดงผลภาษาไทยในหนังสือ
@@ -42,9 +54,13 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
   และหนังสือล่าสุดอีกไม่เกิน 10 เล่มแบบตารางความคืบหน้า
 - **Today** — กราฟเวลาอ่าน 7 วันล่าสุด หนังสือเล่มปัจจุบัน
   เวลารวมของสัปดาห์ จำนวนวันที่อ่านต่อเนื่อง (streak) และหนังสือที่ยังอ่านไม่จบ
-- **Calendar** — นาฬิกาแบบ dot-matrix เวลาที่อ่านวันนี้ และปฏิทินเดือน
-  ที่แรเงาแต่ละวันตามเวลาอ่าน (ยังไม่อ่าน / ต่ำกว่า 60 นาที / ต่ำกว่า 120 นาที / มากกว่านั้น)
-  แตะวันที่ผ่านมาเพื่อดูเวลาที่อ่าน
+- **Calendar** — หน้า Home แบบปฏิทินที่วาดด้วยจุด
+  - นาฬิกา HH:MM ตัวเลขจุดแบบ LED Counter 7
+  - ช่อง "วันนี้" บอกเวลาที่อ่านวันนี้ และมีจุด 24 จุด (จุดละ 10 นาที)
+  - ปฏิทินเดือน (สัปดาห์เริ่มวันอาทิตย์) วันที่อ่านแล้วเป็นวงกลมเข้มขึ้นตามเวลาอ่าน:
+    เทาอ่อนเมื่อต่ำกว่า 60 นาที เทาเข้มเมื่อต่ำกว่า 120 นาที และสีดำเมื่อ 120 นาทีขึ้นไป
+  - วันที่ผ่านมาแต่ไม่ได้อ่านมีวงเส้นเทาล้อม วันนี้มีวงล้อมและจุดดำมุมขวาบน
+  - แตะวันที่ผ่านมาเพื่อดูเวลาที่อ่านของวันนั้น ถ้าไม่ได้แตะจะแสดงจำนวนวันที่อ่านต่อเนื่อง
 
 ### บันทึกเวลาอ่าน
 
@@ -69,6 +85,7 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 
 ### เฉพาะ Metalio E-Ink4-Plus (branch `thai-eink4plus`)
 
+- ไอคอนและฟอนต์ UI ความละเอียดสูง (ขนาด 12/15/18 pt) ตาม upstream 2.1 RC
 - ฟอนต์ UI ปกติใช้น้ำหนัก Medium ให้ตัวหนังสือในเมนูเข้มขึ้นบนจอเฉดเทา
 - จอกระพริบครั้งเดียวต่อการเปลี่ยนหน้าจอ และไม่กระพริบตอนออกจากหนังสือกลับหน้า Home
 - เมนูมีเฉพาะภาษาอังกฤษและภาษาไทย เพื่อให้ firmware พอดีกับพื้นที่ flash
@@ -81,7 +98,7 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 | Branch | ฐานจาก upstream | อุปกรณ์ | ทดสอบบนเครื่องจริง |
 | --- | --- | --- | --- |
 | `thai-2.0.0` | tag `2.0.0` | ทุกบอร์ดที่ upstream 2.0.0 รองรับ | Xteink X4 Pro |
-| `thai-eink4plus` | `feat-metalio-eink4plus` | Metalio E-Ink4-Plus เท่านั้น | Metalio E-Ink4-Plus |
+| `thai-eink4plus` | `feat-metalio-eink4plus` (2.1 RC) | Metalio E-Ink4-Plus เท่านั้น | Metalio E-Ink4-Plus |
 
 บอร์ดอื่นใน `thai-2.0.0` build ผ่าน แต่ยังไม่ได้ทดสอบบนเครื่องจริง
 
@@ -90,9 +107,23 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 
 ---
 
-## Build
+## ดาวน์โหลด
 
-ยังไม่มีไฟล์ release ต้อง build เอง
+ไฟล์เฟิร์มแวร์ที่ build แล้วอยู่ที่หน้า [Releases](https://github.com/thaitop/crosspoint-thai/releases)
+แต่ละ release มีไฟล์ของทั้งสองเครื่อง เลือกตามชื่อไฟล์:
+
+| ไฟล์ | อุปกรณ์ | ใช้ทำอะไร |
+| --- | --- | --- |
+| `x4pro-firmware.bin` | Xteink X4 Pro | อัปเดตผ่าน SD card |
+| `x4pro-firmware.factory.bin` | Xteink X4 Pro | flash ผ่าน USB ที่ offset 0x0 |
+| `eink4plus-firmware.bin` | Metalio E-Ink4-Plus | flash ผ่าน USB ที่ offset 0x10000 |
+| `eink4plus-firmware.factory.bin` | Metalio E-Ink4-Plus | flash ผ่าน USB ที่ offset 0x0 |
+
+บอร์ดอื่นต้อง build เอง
+
+---
+
+## Build
 
 ### เตรียมเครื่อง
 
@@ -135,6 +166,7 @@ PLATFORMIO_CORE_DIR=~/.platformio-eink4plus pio run -e metalio_eink4_plus
 ### ผ่าน SD card (X4 Pro)
 
 1. คัดลอก `firmware.bin` ไปไว้ที่ root ของ SD card
+   (ถ้าโหลดจาก Releases ให้เปลี่ยนชื่อ `x4pro-firmware.bin` เป็น `firmware.bin`)
 2. บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update
 
 ### ผ่าน USB
