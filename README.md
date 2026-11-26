@@ -4,6 +4,9 @@ CrossPoint Thai คือ fork ของ [CrossPoint Reader](https://github.com/
 เฟิร์มแวร์ e-reader แบบ open source ที่เพิ่มการอ่านหนังสือภาษาไทยให้ถูกต้อง
 พร้อมเมนูภาษาไทย ธีมหน้า Home แบบใหม่ บันทึกเวลาอ่าน และหน้าจอพักแบบปฏิทินไทย
 
+**ติดตั้งในคลิกเดียว:** [thaitop.github.io/crosspoint-thai](https://thaitop.github.io/crosspoint-thai/)
+(Xteink X4 Pro และ Metalio E-Ink4-Plus)
+
 ฟีเจอร์อื่นทั้งหมดมาจาก CrossPoint ต้นฉบับ (EPUB, ฟอนต์บน SD card, Wi-Fi, OPDS,
 KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้ที่
 [README ของ upstream](https://github.com/crosspoint-reader/crosspoint-reader#readme)
@@ -109,8 +112,7 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 
 ## ดาวน์โหลด
 
-**วิธีที่ง่ายที่สุด:** เปิด [thaitop.github.io/crosspoint-thai](https://thaitop.github.io/crosspoint-thai/)
-ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ แล้วกดติดตั้งในคลิกเดียว
+ถ้าไม่ได้ build เอง ให้ติดตั้ง[ผ่านหน้าเว็บ](#ผ่านหน้าเว็บ-แนะนำ) ไม่ต้องโหลดไฟล์
 
 ไฟล์เฟิร์มแวร์ที่ build แล้วอยู่ที่หน้า [Releases](https://github.com/thaitop/crosspoint-thai/releases)
 แต่ละ release มีไฟล์ของทั้งสองเครื่อง เลือกตามชื่อไฟล์:
@@ -118,9 +120,12 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 | ไฟล์ | อุปกรณ์ | ใช้ทำอะไร |
 | --- | --- | --- |
 | `x4pro-firmware.bin` | Xteink X4 Pro | อัปเดตผ่าน SD card |
-| `x4pro-firmware.factory.bin` | Xteink X4 Pro | flash ผ่าน USB ที่ offset 0x0 |
+| `x4pro-firmware.factory.bin` | Xteink X4 Pro | flash ผ่าน USB ที่ offset 0x0 \* |
 | `eink4plus-firmware.bin` | Metalio E-Ink4-Plus | flash ผ่าน USB ที่ offset 0x10000 |
-| `eink4plus-firmware.factory.bin` | Metalio E-Ink4-Plus | flash ผ่าน USB ที่ offset 0x0 |
+| `eink4plus-firmware.factory.bin` | Metalio E-Ink4-Plus | flash ผ่าน USB ที่ offset 0x0 \* |
+
+\* ไฟล์ `factory.bin` เขียนทับพื้นที่ NVS ด้วย จึงล้างข้อมูลที่เครื่องเก็บไว้
+เช่น รหัสเครื่องที่ใช้เปิดหนังสือที่มีการป้องกัน หน้าเว็บติดตั้งจะข้ามพื้นที่นี้ให้
 
 บอร์ดอื่นต้อง build เอง
 
@@ -165,6 +170,19 @@ PLATFORMIO_CORE_DIR=~/.platformio-eink4plus pio run -e metalio_eink4_plus
 ---
 
 ## ติดตั้งเฟิร์มแวร์
+
+### ผ่านหน้าเว็บ (แนะนำ)
+
+สำหรับ Xteink X4 Pro และ Metalio E-Ink4-Plus
+
+1. ต่อเครื่องเข้าคอมพิวเตอร์ด้วยสาย USB-C
+2. เปิด [thaitop.github.io/crosspoint-thai](https://thaitop.github.io/crosspoint-thai/)
+   ด้วย Chrome หรือ Edge บนคอมพิวเตอร์
+3. กด **ติดตั้งลง X4 Pro** หรือ **ติดตั้งลง E-Ink4-Plus** ตามรุ่นของเครื่อง เลือกพอร์ตของเครื่อง แล้วรอจนขึ้น "ติดตั้งเสร็จแล้ว"
+   ระหว่างนี้ห้ามถอดสาย
+
+หน้าเว็บติดตั้ง release ล่าสุดเสมอ การตั้งค่าและหนังสือในเครื่องยังอยู่ครบ
+Safari, Firefox และมือถือยังใช้หน้านี้ไม่ได้ เพราะไม่มี Web Serial
 
 ### ผ่าน SD card (X4 Pro)
 
