@@ -275,7 +275,9 @@ bool CrossPointSettings::fromJson(JsonVariantConst doc) {
                                      : (doc["doubleClickPwrLight"] | (uint8_t)1) ? (uint8_t)PWR_FRONTLIGHT
                                                                                  : (uint8_t)IGNORE;
   doublePwrBtn = clamp(doc["doublePwrBtn"] | legacyDoublePwrBtn, (uint8_t)SHORT_PWRBTN_COUNT, defaultDoublePwrBtn());
-  uiTheme = clamp(doc["uiTheme"] | (uint8_t)LYRA, (uint8_t)UI_THEME_COUNT, (uint8_t)LYRA);
+  // A missing or invalid key keeps the board default seeded in main.cpp.
+  const uint8_t themeDefault = uiTheme;
+  uiTheme = clamp(doc["uiTheme"] | themeDefault, (uint8_t)UI_THEME_COUNT, themeDefault);
   if (BoardConfig::hasHomeKey() && doc["homeButtonLongPressAction"].isNull() &&
       !doc["longPressMenuFunction"].isNull()) {
     static constexpr HomeButtonAction LEGACY[] = {HomeButtonAction::Sync,       HomeButtonAction::Ignore,

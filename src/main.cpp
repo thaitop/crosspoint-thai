@@ -836,6 +836,10 @@ void setup() {
   if (gpio.hasTouch()) {
     SETTINGS.readerMenuStyle = CrossPointSettings::READER_MENU_TOOLBAR;
   }
+  // The Calendar home needs a clock; boards without an RTC default to Lyra.
+  if (!halClock.isAvailable()) {
+    SETTINGS.uiTheme = CrossPointSettings::LYRA;
+  }
   SETTINGS.loadFromFile();
   // Push the saved timezone's POSIX rule into the clock (migrating the legacy
   // UTC-offset setting on first boot after the update).

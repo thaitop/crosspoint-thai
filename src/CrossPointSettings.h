@@ -342,7 +342,8 @@ class CrossPointSettings : public PersistableStore<CrossPointSettings> {
   // available size (and persists the snap) whenever the family changes.
   uint8_t fontPointSize = DEFAULT_FONT_POINT_SIZE;
   uint8_t lineSpacing = LINE_SPACING_120;
-  uint8_t paragraphAlignment = JUSTIFIED;
+  // Left by default for every language: Thai text has few spaces, so justified lines get large gaps.
+  uint8_t paragraphAlignment = LEFT_ALIGN;
   // Auto-sleep timeout setting (default 10 minutes). Legacy sleepTimeout enum values are migration-only.
   uint8_t sleepTimeoutMinutes = 10;
   // E-ink refresh frequency (default 15 pages)
@@ -369,8 +370,8 @@ class CrossPointSettings : public PersistableStore<CrossPointSettings> {
   // Long-press Confirm function in EPUB reader (cycles through LONG_PRESS_MENU_FUNCTION values).
   // Defaults to Disabled so shortcut-based bookmark toggling remains opt-in.
   uint8_t longPressMenuFunction = LP_MENU_DISABLED;
-  // UI Theme
-  uint8_t uiTheme = LYRA;
+  // Calendar home by default; main.cpp seeds Lyra on boards without an RTC.
+  uint8_t uiTheme = CALENDAR;
   // Sunlight fading compensation
   uint8_t fadingFix = 0;
   // The fading fix compensates the X4/X3 grayscale waveforms; other boards never get it.
