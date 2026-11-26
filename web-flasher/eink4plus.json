@@ -1,0 +1,21 @@
+{
+  "name": "CrossPoint ภาษาไทย – E-Ink4-Plus",
+  "version": "dev",
+  "new_install_prompt_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S31",
+      "parts": [
+        {
+          "path": "eink4plus-boot.bin",
+          "offset": 0
+        },
+        {
+          "path": "eink4plus-app.bin",
+          "offset": 57344
+        }
+      ]
+    }
+  ],
+  "new_install_improv_wait_time": 0
+}

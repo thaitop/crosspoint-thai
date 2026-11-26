@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CrossPoint ภาษาไทย · ติดตั้งเฟิร์มแวร์ในคลิกเดียว</title>
+    <meta
+      name="description"
+      content="ติดตั้งเฟิร์มแวร์ CrossPoint ภาษาไทยลง Xteink X4 Pro และ Metalio E-Ink4-Plus จาก browser ได้ในคลิกเดียว"
+    />
+    <meta name="theme-color" content="#fcfaf5" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="fonts/noto-sans-thai-thai.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="https://unpkg.com/esp-web-tools@10.5.2/dist/web/install-button.js?module"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="wrap">
+        <a class="wordmark" href="./">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4" y="2.5" width="16" height="19" rx="2.5" />
+            <path d="M8 7.5h8M8 11h8M8 14.5h5" stroke-linecap="round" />
+          </svg>
+          CrossPoint ภาษาไทย
+        </a>
+        <nav aria-label="ลิงก์">
+          <a href="#features">ฟีเจอร์</a>
+          <a href="#install">ติดตั้ง</a>
+          <a href="https://github.com/thaitop/crosspoint-thai">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap hero-text">
+          <p class="badge">เวอร์ชันล่าสุด <span data-release>—</span></p>
+          <h1>
+            <span class="nb">อ่านหนังสือไทย</span> <span class="nb">บน e-reader</span>
+            <mark class="nb">ได้ถูกต้อง</mark> <span class="nb">ทุกวรรณยุกต์</span>
+          </h1>
+          <p class="lead">
+            เฟิร์มแวร์ CrossPoint ฉบับภาษาไทย สำหรับ Xteink X4 Pro และ Metalio <span class="nb">E-Ink4-Plus</span>
+            เสียบสาย USB แล้วกดติดตั้งจาก browser ได้เลย ไม่ต้องลงโปรแกรม
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-lg" href="#install">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+              </svg>
+              ติดตั้งเลย
+            </a>
+            <svg class="doodle" viewBox="0 0 120 60" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M112 48c-18 6-46 4-64-8S22 14 10 12" />
+              <path d="M18 5 9 12l8 8" />
+            </svg>
+            <p class="aside">ใช้เวลาประมาณ 1–2 นาที</p>
+          </div>
+        </div>
+
+        <div class="wrap">
+          <div class="fan">
+            <figure class="screen fan-side fan-left">
+              <img src="images/home-ledger.png" width="684" height="1216" alt="หน้า Home ธีม Ledger: หนังสือเล่มปัจจุบันและหนังสือล่าสุดพร้อมความคืบหน้า" />
+            </figure>
+            <figure class="screen fan-center">
+              <img src="images/home-calendar.png" width="684" height="1216" alt="หน้า Home ธีม Calendar: นาฬิกาตัวเลขจุด เวลาอ่านวันนี้ และปฏิทินเดือนที่วงกลมเข้มตามเวลาอ่าน" />
+            </figure>
+            <figure class="screen fan-side fan-right">
+              <img src="images/home-today.png" width="684" height="1216" alt="หน้า Home ธีม Today: กราฟเวลาอ่าน 7 วันล่าสุด" />
+            </figure>
+            <p class="fan-caption">ธีมหน้า Home ใหม่ 3 แบบ <span>Ledger · Calendar · Today</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="features" id="features" aria-labelledby="features-title">
+        <div class="wrap">
+          <div class="features-head">
+            <h2 id="features-title">ภาษาไทยที่อ่านแล้วไม่สะดุด</h2>
+            <p>ทุกอย่างทำงานในเครื่อง ไม่ต้องใช้อินเทอร์เน็ต และใช้ได้กับฟอนต์ไทยบน SD card ด้วย</p>
+          </div>
+          <ol class="feature-list">
+            <li class="feature">
+              <figure class="screen thumb"><img src="images/reader-thai.png" width="684" height="1216" loading="lazy" alt="หน้าหนังสือภาษาไทย ตัดบรรทัดระหว่างคำ" /></figure>
+              <div>
+                <span class="tag">การอ่าน</span>
+                <h3>สระและวรรณยุกต์อยู่ถูกที่</h3>
+                <p>
+                  วรรณยุกต์ซ้อนบนสระบนได้ถูกต้อง ยกพ้นนิคหิตของสระอำ และเลื่อนซ้ายบนพยัญชนะหางสูง ป ฝ ฟ
+                  ข้อความตัดบรรทัดระหว่างคำด้วยพจนานุกรม ไม่ตัดกลางคำ
+                </p>
+              </div>
+            </li>
+            <li class="feature">
+              <figure class="screen thumb"><img src="images/settings-thai.png" width="684" height="1216" loading="lazy" alt="เมนูตั้งค่าภาษาไทย" /></figure>
+              <div>
+                <span class="tag">เมนู</span>
+                <h3>เมนูภาษาไทยครบทุกข้อความ</h3>
+                <p>เลือก ไทย ในการตั้งค่าภาษา ข้อความที่ยาวเกินจะตัดตามคำ และไม่แยกพยัญชนะออกจากสระหรือวรรณยุกต์</p>
+              </div>
+            </li>
+            <li class="feature">
+              <figure class="screen thumb"><img src="images/sleep-thai-calendar.png" width="684" height="1216" loading="lazy" alt="หน้าจอพักปฏิทินไทย มีปี พ.ศ. วันทางจันทรคติ และดวงจันทร์" /></figure>
+              <div>
+                <span class="tag">หน้าจอพัก</span>
+                <h3>ปฏิทินไทยตอนพักเครื่อง</h3>
+                <p>ปี พ.ศ. ปีนักษัตร ข้างขึ้นข้างแรมพร้อมภาพดวงจันทร์ของวันนั้น และวันสำคัญที่กำลังจะมาถึง</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="install" id="install" aria-labelledby="install-title">
+        <div class="wrap">
+          <div class="install-head">
+            <h2 id="install-title">ติดตั้งในคลิกเดียว</h2>
+            <p>ใช้ Chrome หรือ Edge บนคอมพิวเตอร์ การตั้งค่าและหนังสือในเครื่องยังอยู่ครบ</p>
+          </div>
+
+          <ol class="steps">
+            <li><strong>เสียบสาย USB-C</strong>ต่อเครื่องกับคอมพิวเตอร์ แล้วเปิดเครื่อง</li>
+            <li><strong>กดปุ่มติดตั้ง</strong>ของรุ่นที่คุณมีด้านล่าง</li>
+            <li><strong>เลือกพอร์ตแล้วรอ</strong>ประมาณ 1–2 นาที ห้ามถอดสายระหว่างนั้น</li>
+          </ol>
+
+          <div class="devices">
+            <article class="device device-x4pro" aria-labelledby="x4pro-title">
+              <div class="device-top">
+                <h3 id="x4pro-title">Xteink X4 Pro</h3>
+                <p class="chip">ESP32-S3 · ทดสอบบนเครื่องจริงแล้ว</p>
+                <p>ฐาน CrossPoint 2.0.0 รุ่นเสถียร เมนูมีทุกภาษาของต้นฉบับรวมถึงภาษาไทย</p>
+              </div>
+              <div class="device-body">
+                <esp-web-install-button manifest="x4pro.json">
+                  <button class="btn btn-lg" slot="activate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                    </svg>
+                    ติดตั้งลง X4 Pro
+                  </button>
+                  <span slot="unsupported" class="unsupported">browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์ หรืออัปเดตผ่าน SD card ด้านล่าง</span>
+                  <span slot="not-allowed" class="not-allowed">ต้องเปิดหน้านี้ผ่าน https จึงจะติดตั้งได้</span>
+                </esp-web-install-button>
+                <details class="sd">
+                  <summary>flash ผ่าน USB ไม่ได้? อัปเดตผ่าน SD card</summary>
+                  <ol>
+                    <li>ดาวน์โหลดไฟล์เฟิร์มแวร์ ไฟล์จะชื่อ <code>firmware.bin</code></li>
+                    <li>คัดลอกไปไว้ที่ root ของ SD card แล้วใส่การ์ดกลับเข้าเครื่อง</li>
+                    <li>บนเครื่อง ไปที่ Settings → General → SD Card Firmware Update</li>
+                  </ol>
+                  <a class="btn btn-outline" href="x4pro-firmware.bin" download="firmware.bin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" />
+                    </svg>
+                    ดาวน์โหลด firmware.bin
+                  </a>
+                </details>
+              </div>
+            </article>
+
+            <article class="device device-plus" aria-labelledby="plus-title">
+              <div class="device-top">
+                <h3 id="plus-title">Metalio <span class="nb">E-Ink4-Plus</span></h3>
+                <p class="chip">ESP32-S31 · ทดสอบบนเครื่องจริงแล้ว</p>
+                <p>จอความละเอียดสูง ไอคอนและฟอนต์เมนูคมขึ้น เมนูมีภาษาไทยและอังกฤษ</p>
+              </div>
+              <div class="device-body">
+                <esp-web-install-button manifest="eink4plus.json">
+                  <button class="btn btn-lg" slot="activate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 3v10M8 9l4 4 4-4M6 21h12a2 2 0 0 0 2-2v-3H4v3a2 2 0 0 0 2 2Z" />
+                    </svg>
+                    ติดตั้งลง E-Ink4-Plus
+                  </button>
+                  <span slot="unsupported" class="unsupported">browser นี้ติดตั้งผ่าน USB ไม่ได้ เปิดหน้านี้ด้วย Chrome หรือ Edge บนคอมพิวเตอร์</span>
+                  <span slot="not-allowed" class="not-allowed">ต้องเปิดหน้านี้ผ่าน https จึงจะติดตั้งได้</span>
+                </esp-web-install-button>
+              </div>
+            </article>
+          </div>
+
+          <div class="after">
+            <h3>หลังติดตั้งเสร็จ</h3>
+            <ol>
+              <li>ไปที่ Settings → General → Language แล้วเลือก <strong>ไทย</strong></li>
+              <li>ตั้งเวลาเครื่องที่ Settings → General → Clock เพื่อให้บันทึกเวลาอ่านและปฏิทินไทยทำงาน</li>
+              <li>หนังสือไทยต้องใช้ฟอนต์ที่มีอักษรไทย ใส่ฟอนต์ลง SD card ตาม<a class="nb" href="https://github.com/thaitop/crosspoint-thai/blob/thai-2.0.0/docs/sd-card-fonts.md">คู่มือฟอนต์บน SD card</a></li>
+            </ol>
+            <div class="after-notes">
+              <p>หน้านี้รองรับเฉพาะ X4 Pro และ <span class="nb">E-Ink4-Plus</span> รุ่นอื่น เช่น Xteink X3/X4 ยังต้อง build เอง</p>
+              <p>
+                Xteink บางเครื่องล็อก USB มาจากโรงงาน ดู<a class="nb" href="https://github.com/crosspoint-reader/crosspoint-reader#usb-locked-devices-xteink-unlocker">วิธีปลดล็อก</a>
+                อยากกลับไปใช้เฟิร์มแวร์เดิม ใช้ <a class="nb" href="https://crosspointreader.com/install">web flasher ของ CrossPoint</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <div class="wrap">
+        <p>โปรเจกต์ open source ไม่มีส่วนเกี่ยวข้องกับ Xteink, Metalio หรือผู้ผลิตรายใด และไม่ใช่รุ่นทางการของ CrossPoint</p>
+        <nav aria-label="ลิงก์ท้ายหน้า">
+          <a href="https://github.com/thaitop/crosspoint-thai">ซอร์สโค้ด</a>
+          <a href="https://github.com/thaitop/crosspoint-thai/releases">Releases ทั้งหมด</a>
+          <a href="https://github.com/crosspoint-reader/crosspoint-reader">CrossPoint ต้นฉบับ</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script>
+      fetch("x4pro.json")
+        .then((r) => r.json())
+        .then((m) => {
+          document.querySelector("[data-release]").textContent = m.version;
+        })
+        .catch(() => {});
+    </script>
+  </body>
+</html>
