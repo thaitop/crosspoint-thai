@@ -5,6 +5,15 @@ import { layoutProblem, needsLayoutCheck, TABLE_OFFSET, TABLE_SIZE } from "./par
 const FLASH_MODULE = "https://esm.sh/esp-web-tools@10.5.2/dist/flash.js?deps=esptool-js@0.7.1";
 const ESPTOOL_MODULE = "https://esm.sh/esptool-js@0.7.1";
 const TABLE_READ_TIMEOUT_MS = 15000;
+const DISCONNECT_TIMEOUT_MS = 2000;
+
+function withTimeout(promise, ms, message) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 const dialog = document.getElementById("flash-dialog");
 const view = dialog.querySelector("[data-view]");
@@ -128,24 +137,23 @@ async function checkLayout(port, layout) {
   try {
     const loader = new ESPLoader({ transport, baudrate: 115200 });
     await loader.main();
-    let timer;
-    const timeout = new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Error("partition table read timed out")), TABLE_READ_TIMEOUT_MS);
-    });
     try {
+      // Another chip family cannot hold a Picco layout, and flash() rejects
+      // it with a clearer message. The S31 stub also never answers READ_FLASH.
+      if (!needsLayoutCheck(loader.chip.CHIP_NAME)) return null;
       const read = loader.readFlash(TABLE_OFFSET, TABLE_SIZE);
       read.catch(() => {}); // a read left behind by the timeout fails on disconnect
-      const table = await Promise.race([read, timeout]);
+      const table = await withTimeout(read, TABLE_READ_TIMEOUT_MS, "partition table read timed out");
       return layoutProblem(table, layout);
     } finally {
-      clearTimeout(timer);
       // Leave the chip running its firmware, not the stub, so flash() starts
       // from the same state as without this check.
       await loader.after().catch(() => {});
     }
   } finally {
-    // After a reset the USB port may already be gone; keep the result above.
-    await transport.disconnect().catch(() => {});
+    // After a reset the USB port may already be gone, and close() can then
+    // wait forever; keep the result above either way.
+    await withTimeout(transport.disconnect(), DISCONNECT_TIMEOUT_MS, "disconnect timed out").catch(() => {});
   }
 }
 
