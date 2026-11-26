@@ -13,6 +13,45 @@ pio check --fail-on-defect low --fail-on-defect medium --fail-on-defect high
 pio run
 ```
 
+## Simulator check for all devices
+
+The desktop simulator ([crosspoint-simulator](https://github.com/crosspoint-reader/crosspoint-simulator))
+runs the firmware on macOS with each device profile. Its environments are in
+`platformio.simulator.ini`. Install SDL2 first (`brew install sdl2`).
+
+Check every device:
+
+```sh
+uv run -p 3.12 scripts/sim_check.py            # all devices
+uv run -p 3.12 scripts/sim_check.py x4_pro picco   # some devices
+```
+
+Device names: `x4`, `x3`, `x4_pro`, `x4_classic`, `sticky`, `papermono`,
+`metalio_eink4`, `eego_a4`, `picco`.
+
+Each device gets a fresh simulated SD card with the Thai UI,
+`test/epubs/thai_sample.epub`, and the Thai reader font copied to
+`/.fonts/<family>/`. The font is not in the repository. By default the script
+reads `~/Downloads/E-Reader/Fonts/GoogleSans` (a folder of `GoogleSans_<size>.cpfont` files).
+Set `SIM_CHECK_FONT_DIR` to use another folder. The script follows the same path on each device:
+Home, file browser, two book pages, Settings. It writes screenshots and logs to
+`build/sim-check/<time>/`. Open `index.html` there to review
+the screenshots. The script exits with 1 if a build fails, the simulator
+crashes or hangs, an expected screen is not reached, a screenshot is missing,
+page 2 looks the same as page 1, the reader font is not loaded, or no Thai text
+is drawn. It exits with 2 if a device name is unknown or the font folder, the
+sample book or `pio` is missing.
+
+To open one device by hand: `pio run -e simulator_x4_pro -t run_simulator`.
+A manual run uses `./fs_` as the SD card, which the script does not prepare:
+copy the font and books there yourself.
+
+The simulator does not model e-paper timing, ghosting, power, the real RAM
+limit, USB mass storage or Bluetooth page turners. It does not replace hardware testing.
+
+Tests for the script: `uvx pytest test/sim_check -v`.
+Regenerate the sample book: `uv run -p 3.12 scripts/generate_thai_sample_epub.py`.
+
 ## Flash and monitor
 
 Flash firmware:
