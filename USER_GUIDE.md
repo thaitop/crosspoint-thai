@@ -266,7 +266,7 @@ Settings are grouped into **System**, **Display**, **Reader**, **Controls**, **L
   - "Ledger" - The current book large, with recent books in a progress table
   - "Today" - Reading time for the last 7 days, the current book and the reading streak
   - "Calendar" (default on devices with a clock) - A clock, today's reading time and a monthly reading calendar. Devices without a clock (the original X4) default to "Lyra"
-  - "Shelf" - The current book in a card with its progress and a resume button, today's reading time and streak (on devices with a clock), up to 9 recent covers shown 3 at a time (swipe left or right, or move past the last cover, to turn the page), a 30-day reading activity grid (needs the clock; the history starts from the current month after updating), and a tool bar at the bottom
+  - "Shelf" - The current book in a card with its progress and a resume button, today's reading time (on devices with a clock), up to 9 recent covers shown 3 at a time (swipe left or right, or move past the last cover, to turn the page), a 30-day reading activity grid (needs the clock; the history starts from the current month after updating), and a tool bar at the bottom
 
 - **UI Font**: Choose the font used for menus, library titles, and other interface text. See [Menu Fonts](docs/sd-card-fonts.md#menu-fonts) for supported files and sizes.
 

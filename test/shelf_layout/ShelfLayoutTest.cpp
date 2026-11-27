@@ -48,8 +48,7 @@ TEST(ShelfLayout, HeatGridSize) {
 }
 
 TEST(ShelfLayout, ReadingLineNeedsDateAndActivity) {
-  EXPECT_FALSE(shelf::showReadingLine(false, 25, 4));
-  EXPECT_FALSE(shelf::showReadingLine(true, 0, 0));
-  EXPECT_TRUE(shelf::showReadingLine(true, 0, 3));
-  EXPECT_TRUE(shelf::showReadingLine(true, 12, 0));
+  EXPECT_FALSE(shelf::showReadingLine(false, 25));
+  EXPECT_FALSE(shelf::showReadingLine(true, 0));
+  EXPECT_TRUE(shelf::showReadingLine(true, 12));
 }
