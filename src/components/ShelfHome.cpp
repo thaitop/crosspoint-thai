@@ -152,26 +152,13 @@ void ShelfHome::drawCard(const GfxRenderer& renderer, const RecentBook* book, co
     const bool hasDate = ReadingLogStore::localDate(date);
     const int32_t today = hasDate ? ReadingLogStore::dayNumber(date) : -1;
     const int minutes = hasDate ? static_cast<int>((READING_LOG.secondsOn(today) + 30) / 60) : 0;
-    const int streak = hasDate ? READING_LOG.streak(today) : 0;
-    if (shelf::showReadingLine(hasDate, minutes, streak)) {
+    if (shelf::showReadingLine(hasDate, minutes)) {
       char duration[32];
       homeui::formatDuration(duration, sizeof(duration), static_cast<uint32_t>(minutes));
-      char today[96];
-      char streakText[64];
-      snprintf(today, sizeof(today), "%s %s", tr(STR_SHELF_READ_TODAY), duration);
-      snprintf(streakText, sizeof(streakText), "%s %d %s", tr(STR_SHELF_STREAK), streak, tr(STR_UNIT_DAYS));
-      char line[160];
-      snprintf(line, sizeof(line), "%s · %s", today, streakText);
-      // Too wide for one line: today's time above the streak.
-      if (renderer.getTextWidth(UI_10_FONT_ID, line) <= w) {
-        bottom -= smallH;
-        renderer.drawText(UI_10_FONT_ID, x, bottom, line, true);
-      } else {
-        bottom -= smallH;
-        renderer.drawText(UI_10_FONT_ID, x, bottom, renderer.truncatedText(UI_10_FONT_ID, streakText, w).c_str(), true);
-        bottom -= smallH;
-        renderer.drawText(UI_10_FONT_ID, x, bottom, renderer.truncatedText(UI_10_FONT_ID, today, w).c_str(), true);
-      }
+      char line[96];
+      snprintf(line, sizeof(line), "%s %s", tr(STR_SHELF_READ_TODAY), duration);
+      bottom -= smallH;
+      renderer.drawText(UI_10_FONT_ID, x, bottom, renderer.truncatedText(UI_10_FONT_ID, line, w).c_str(), true);
       bottom -= 6;
     }
     if (progress[0] >= 0) {
@@ -181,15 +168,15 @@ void ShelfHome::drawCard(const GfxRenderer& renderer, const RecentBook* book, co
     }
 
     const int space = bottom - cover.y;
-    const bool showAuthor = !book->author.empty() && space >= titleH + smallH + 2;
-    const int titleLines = std::clamp((space - (showAuthor ? smallH + 2 : 0)) / std::max(1, titleH), 1, 2);
+    // The title takes up to two lines first; the author shows if it still fits.
+    const int titleLines = std::clamp(space / std::max(1, titleH), 1, 2);
+    const auto lines = renderer.wrappedText(UI_12_FONT_ID, book->title.c_str(), w, titleLines, EpdFontFamily::BOLD);
     int y = cover.y;
-    for (const auto& line :
-         renderer.wrappedText(UI_12_FONT_ID, book->title.c_str(), w, titleLines, EpdFontFamily::BOLD)) {
+    for (const auto& line : lines) {
       renderer.drawText(UI_12_FONT_ID, x, y, line.c_str(), true, EpdFontFamily::BOLD);
       y += titleH;
     }
-    if (showAuthor) {
+    if (!book->author.empty() && y + 2 + smallH <= bottom) {
       renderer.drawText(UI_10_FONT_ID, x, y + 2, renderer.truncatedText(UI_10_FONT_ID, book->author.c_str(), w).c_str(),
                         true);
     }

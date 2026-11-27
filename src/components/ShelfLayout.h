@@ -39,8 +39,6 @@ constexpr int heatGridWidth(const int cell) { return HEAT_COLUMNS * cell + (HEAT
 constexpr int heatGridHeight(const int cell) { return HEAT_ROWS * cell + (HEAT_ROWS - 1) * HEAT_GAP; }
 
 // The reading-time line needs a local date and something to report.
-constexpr bool showReadingLine(const bool hasDate, const int minutesToday, const int streakDays) {
-  return hasDate && (minutesToday > 0 || streakDays > 0);
-}
+constexpr bool showReadingLine(const bool hasDate, const int minutesToday) { return hasDate && minutesToday > 0; }
 
 }  // namespace shelf
