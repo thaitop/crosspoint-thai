@@ -4,7 +4,8 @@
 Usage: uv run -p 3.12 scripts/sim_check.py [device ...]
 
 Each device gets a fresh SD folder (Thai UI, test/epubs/thai_sample.epub, reader font),
-then the same path: Home -> file browser -> book page 1 -> page 2 -> Settings.
+then the same path: Home -> file browser -> book page 1 -> page 2 -> Home again -> Settings.
+Set SIM_CHECK_UI_THEME to a theme number (8 = Shelf) to seed that home theme.
 Output: build/sim-check/<timestamp>/index.html. Exit code 1 if any device failed.
 This is a simulator check, not e-paper validation.
 """
@@ -28,7 +29,7 @@ SAMPLE_BOOK = REPO / "test" / "epubs" / "thai_sample.epub"
 FONT_DIR = Path(os.environ.get("SIM_CHECK_FONT_DIR", Path.home() / "Downloads" / "E-Reader" / "Fonts" / "GoogleSans"))
 PIO = os.environ.get("PIO", str(Path.home() / ".platformio" / "penv" / "bin" / "pio"))
 
-STEPS = ["home", "files", "book_p1", "book_p2", "settings"]
+STEPS = ["home", "files", "book_p1", "book_p2", "home_book", "settings"]
 # Log lines from src/activities/Activity.cpp and EpubReaderActivity.cpp.
 EXPECTED_ACTIVITIES = ["Home", "FileBrowser", "EpubReader", "Settings"]
 HEADER = "Simulator check — not e-paper validation."
@@ -55,15 +56,16 @@ def make_script(open_files: str, open_item: str, next_page: str, go_home: str,
     after a WAIT count from that WAIT. {dir} is filled with the output folder.
     """
     open_files, open_item, next_page, go_home = map(held, (open_files, open_item, next_page, go_home))
-    # Home may still be loading the recent book; give it time before navigating.
-    settings = [f"{1500 + 500 * i}:{held(a)}" for i, a in enumerate(open_settings)]
+    # Home loads the recent book's covers after its first paint; shoot it once
+    # they are drawn, then navigate.
+    settings = [f"{3000 + 500 * i}:{held(a)}" for i, a in enumerate(open_settings)]
     items = [
         "WAIT:Entering activity: Home", "800:SHOT:{dir}/home.bmp",
         f"1000:{open_files}", "WAIT:Entering activity: FileBrowser", "800:SHOT:{dir}/files.bmp",
         f"1000:{open_item}", "WAIT:SCREEN: .*thai_sample", f"500:{open_item}",
         "WAIT:Entering activity: EpubReader", PAGE_DRAWN, "800:SHOT:{dir}/book_p1.bmp",
         f"1000:{next_page}", PAGE_DRAWN, "800:SHOT:{dir}/book_p2.bmp",
-        f"1000:{go_home}", "WAIT:Entering activity: Home", *settings,
+        f"1000:{go_home}", "WAIT:Entering activity: Home", "2500:SHOT:{dir}/home_book.bmp", *settings,
         "WAIT:Entering activity: Settings", "800:SHOT:{dir}/settings.bmp", "1200:QUIT",
     ]
     # Items run in time order from the last matched WAIT, so a WAIT must be
@@ -86,8 +88,12 @@ METALIO_SCRIPT = make_script("ENTER", "ENTER", "NEXT", "HOME", ["UP", "ENTER"])
 # Picco has no Back or Home key: side Down turns the page, a swipe up returns Home.
 PICCO_SCRIPT = make_script("ENTER", "ENTER", "DOWN", "SWIPE:0.5,0.98,0.5,0.5", ["UP", "ENTER"])
 # EEGO A4 has only Up/Down/Power: touch for lists, the screen key for Home.
-# Taps: Calendar home "Files" tab, first file-list row, Calendar home "Settings" tab.
-EEGO_SCRIPT = make_script("TAP:0.12,0.9", "TAP:0.3,0.18", "DOWN", "HOME", ["TAP:0.87,0.9"])
+# Taps: home "Files" tool, first file-list row, home "Settings" tool. The
+# Shelf home (uiTheme 8, CrossPointSettings::SHELF) has its tool bar lower than
+# Calendar's; keep TOOL_Y in step with TOOL_BAR_HEIGHT in src/components/ShelfHome.cpp.
+SHELF_THEME = os.environ.get("SIM_CHECK_UI_THEME") == "8"
+TOOL_Y = 0.947 if SHELF_THEME else 0.9
+EEGO_SCRIPT = make_script(f"TAP:0.12,{TOOL_Y}", "TAP:0.3,0.18", "DOWN", "HOME", [f"TAP:0.87,{TOOL_Y}"])
 
 
 @dataclass
@@ -125,6 +131,8 @@ def seed_sd(dest: Path, book: Path, font_dir: Path | None = None) -> None:
     (dest / "books").mkdir(parents=True)
     shutil.copy2(book, dest / "books" / book.name)
     settings = {"language": "TH"}
+    if "SIM_CHECK_UI_THEME" in os.environ:
+        settings["uiTheme"] = int(os.environ["SIM_CHECK_UI_THEME"])
     if font_dir is not None:
         shutil.copytree(font_dir, dest / ".fonts" / font_dir.name)
         settings["sdFontFamilyName"] = font_dir.name

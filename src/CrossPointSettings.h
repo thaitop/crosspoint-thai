@@ -213,6 +213,7 @@ class CrossPointSettings : public PersistableStore<CrossPointSettings> {
     LEDGER = 5,
     TODAY = 6,
     CALENDAR = 7,
+    SHELF = 8,
     UI_THEME_COUNT
   };
 

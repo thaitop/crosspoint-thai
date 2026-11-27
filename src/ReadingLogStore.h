@@ -6,9 +6,11 @@
 #include <cstdint>
 #include <ctime>
 
+#include "util/ReadingHistory.h"
+
 // Reading time per local calendar day for the last week and for each day of
-// the current month, plus the current streak of days with reading. Days are
-// counted only while the clock is set.
+// the current month, minutes per day for the last 13 weeks, and the current
+// streak of days with reading. Days are counted only while the clock is set.
 class ReadingLogStore : public PersistableStore<ReadingLogStore> {
  public:
   static constexpr int DAYS = 7;
@@ -23,6 +25,7 @@ class ReadingLogStore : public PersistableStore<ReadingLogStore> {
   uint16_t streakDays = 0;
   int32_t monthKey = -1;                    // year * 12 + tm_mon of monthSeconds
   std::array<uint32_t, 31> monthSeconds{};  // indexed by tm_mday - 1
+  ReadingHistory history;
 
   ReadingLogStore() = default;
   ~ReadingLogStore() = default;
@@ -47,6 +50,8 @@ class ReadingLogStore : public PersistableStore<ReadingLogStore> {
   uint32_t secondsOnDate(const struct tm& date) const;
   // Days with less reading than this do not count as reading days.
   static constexpr uint32_t READING_DAY_SECONDS = 60;
+  // Minutes read on a day of the last ReadingHistory::DAYS days, else 0.
+  int historyMinutes(int32_t day) const { return history.minutesOn(day); }
   // Consecutive reading days ending today or yesterday.
   int streak(int32_t today) const { return streakEnd >= today - 1 ? streakDays : 0; }
 };

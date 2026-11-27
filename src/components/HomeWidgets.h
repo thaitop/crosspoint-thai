@@ -31,6 +31,8 @@ struct Tool {
   UIIcon icon;
 };
 
+// 32px bitmap of a home tool icon, or nullptr.
+const uint8_t* toolIcon(UIIcon icon);
 // Minutes as "45 min", "2 h" or "1 h 20 min" in the UI language.
 void formatDuration(char* out, size_t size, uint32_t minutes);
 // Equal cells with the icon stacked above its label; the selected cell is
@@ -39,8 +41,10 @@ void drawToolBar(const GfxRenderer& renderer, const Tool* tools, int count, int 
                  Rect* targets);
 // Outlined bar filled to percent (0-100).
 void drawProgressTrack(const GfxRenderer& renderer, Rect rect, int percent);
-// Cover thumb generated at thumbHeight, filled into slot; placeholder when missing.
-void drawCover(const GfxRenderer& renderer, const RecentBook& book, int thumbHeight, Rect slot);
+// Cover thumb generated at thumbHeight, filled into slot; placeholder when
+// missing. A radius rounds the corners and the border; the cut corners are
+// cleared to white, so draw it on a white background.
+void drawCover(const GfxRenderer& renderer, const RecentBook& book, int thumbHeight, Rect slot, int radius = 0);
 // Cover with title, author, progress (percent -1 = unknown) and a resume
 // button that is filled when selected. Without percentText the bar alone
 // carries the progress, directly under the title and author.

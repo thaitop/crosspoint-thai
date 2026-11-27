@@ -262,6 +262,7 @@ Settings are grouped into **System**, **Display**, **Reader**, **Controls**, **L
   - "Ledger" - The current book large, with recent books in a progress table
   - "Today" - Reading time for the last 7 days, the current book and the reading streak
   - "Calendar" (default on devices with a clock) - A clock, today's reading time and a monthly reading calendar. Devices without a clock (the original X4) default to "Lyra"
+  - "Shelf" - The current book in a card with its progress and a resume button, today's reading time and streak (on devices with a clock), up to 9 recent covers shown 3 at a time (swipe left or right, or move past the last cover, to turn the page), a 13-week reading activity grid (needs the clock; the history starts from the current month after updating), and a tool bar at the bottom
 
 - **Sunlight Fading Fix**: Configure whether to enable a software-fix for the issue where white X4 models may fade when used in direct sunlight:
   

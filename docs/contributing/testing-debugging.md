@@ -34,7 +34,8 @@ Each device gets a fresh simulated SD card with the Thai UI,
 `/.fonts/<family>/`. The font is not in the repository. By default the script
 reads `~/Downloads/E-Reader/Fonts/GoogleSans` (a folder of `GoogleSans_<size>.cpfont` files).
 Set `SIM_CHECK_FONT_DIR` to use another folder. The script follows the same path on each device:
-Home, file browser, two book pages, Settings. It writes screenshots and logs to
+Home, file browser, two book pages, Home again, Settings. Set
+`SIM_CHECK_UI_THEME` to a theme number (8 = Shelf) to seed that home theme. It writes screenshots and logs to
 `build/sim-check/<time>/`. Open `index.html` there to review
 the screenshots. The script exits with 1 if a build fails, the simulator
 crashes or hangs, an expected screen is not reached, a screenshot is missing,

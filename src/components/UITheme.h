@@ -47,6 +47,7 @@ class UITheme {
   static bool hasLedgerHome();
   static bool hasTodayHome();
   static bool hasCalendarHome();
+  static bool hasShelfHome();
   void reload();
   void setTheme(CrossPointSettings::UI_THEME type);
   static std::string getCoverThumbPath(std::string coverBmpPath, int coverHeight);

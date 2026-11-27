@@ -327,7 +327,8 @@ class GfxRenderer {
   // unlike the other outlines, so a ring can be gray.
   void drawCircle(int x, int y, int diameter, int lineWidth, Color color) const;
   void drawImage(const uint8_t bitmap[], int x, int y, int width, int height) const;
-  void drawIcon(const uint8_t bitmap[], int x, int y, int size) const;
+  // black=false draws the icon's ink white, for icons on a filled background.
+  void drawIcon(const uint8_t bitmap[], int x, int y, int size, bool black = true) const;
   bool drawBitmap(const Bitmap& bitmap, int x, int y, int maxWidth, int maxHeight, float cropX = 0, float cropY = 0,
                   bool whiteAsTransparent = false) const;
   bool drawBitmap1Bit(const Bitmap& bitmap, int x, int y, int maxWidth, int maxHeight) const;

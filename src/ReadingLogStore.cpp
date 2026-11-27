@@ -25,6 +25,13 @@ void ReadingLogStore::toJson(JsonDocument& doc) const {
   doc["monthKey"] = monthKey;
   JsonArray month = doc["monthSeconds"].to<JsonArray>();
   for (const uint32_t seconds : monthSeconds) month.add(seconds);
+  // Oldest first, ending at historyEnd, so the saved layout does not depend on the ring.
+  const int32_t end = history.endDay();
+  doc["historyEnd"] = end;
+  JsonArray past = doc["history"].to<JsonArray>();
+  for (int32_t day = end - (ReadingHistory::DAYS - 1); end >= 0 && day <= end; ++day) {
+    past.add(history.minutesOn(day));
+  }
 }
 
 bool ReadingLogStore::fromJson(JsonVariantConst doc) {
@@ -49,6 +56,31 @@ bool ReadingLogStore::fromJson(JsonVariantConst doc) {
     for (int day = 0; day < static_cast<int>(monthSeconds.size()); ++day) {
       if (mask & (1u << day)) monthSeconds[day] = READING_DAY_SECONDS;
     }
+  }
+  if (doc["history"].isNull()) {
+    // Older files have no history: seed it from the month and week logs.
+    history = ReadingHistory{};
+    if (monthKey >= 0) {
+      struct tm date{};
+      date.tm_year = monthKey / 12 - 1900;
+      date.tm_mon = monthKey % 12;
+      date.tm_mday = 1;
+      const int32_t first = dayNumber(date);
+      for (int i = 0; i < static_cast<int>(monthSeconds.size()); ++i) {
+        if (monthSeconds[i] > 0) history.set(first + i, monthSeconds[i]);
+      }
+    }
+    for (int i = count - 1; i >= 0; --i) {
+      if (history.minutesOn(days[i].day) == 0) history.set(days[i].day, days[i].seconds);
+    }
+  } else {
+    uint8_t past[ReadingHistory::DAYS]{};
+    int slots = 0;
+    for (JsonVariantConst minutes : doc["history"].as<JsonArrayConst>()) {
+      if (slots >= ReadingHistory::DAYS) break;
+      past[slots++] = static_cast<uint8_t>(std::min(minutes | 0u, 255u));
+    }
+    history.load(doc["historyEnd"] | -1, past, slots);
   }
   LOG_DBG("RLS", "Reading log loaded (%d days)", count);
   return true;
@@ -100,6 +132,7 @@ void ReadingLogStore::addReading(const uint32_t seconds) {
     streakEnd = today;
   }
   monthSeconds[now.tm_mday - 1] += seconds;
+  history.record(today, days[0].seconds);
   if (!saveToFile()) LOG_ERR("RLS", "Failed to save reading log");
 }
 

@@ -28,6 +28,9 @@ constexpr int PERCENT_FONT_ID = NOTOSANS_18_FONT_ID;
 #else
 constexpr int PERCENT_FONT_ID = UI_12_FONT_ID;
 #endif
+}  // namespace
+
+namespace homeui {
 
 const uint8_t* toolIcon(const UIIcon icon) {
   switch (icon) {
@@ -45,9 +48,6 @@ const uint8_t* toolIcon(const UIIcon icon) {
       return nullptr;
   }
 }
-}  // namespace
-
-namespace homeui {
 
 void formatDuration(char* out, const size_t size, const uint32_t minutes) {
   if (minutes < 60) {
@@ -93,7 +93,8 @@ void drawProgressTrack(const GfxRenderer& renderer, const Rect rect, const int p
   if (fill > 0) renderer.fillRect(rect.x + 1, rect.y + 1, fill, rect.height - 2, true);
 }
 
-void drawCover(const GfxRenderer& renderer, const RecentBook& book, const int thumbHeight, const Rect slot) {
+void drawCover(const GfxRenderer& renderer, const RecentBook& book, const int thumbHeight, const Rect slot,
+               const int radius) {
   bool drawn = false;
   if (!book.coverBmpPath.empty()) {
     HalFile file;
@@ -103,7 +104,24 @@ void drawCover(const GfxRenderer& renderer, const RecentBook& book, const int th
     }
   }
   if (!drawn) BaseTheme::drawCoverPlaceholder(renderer, slot);
-  renderer.drawRect(slot.x, slot.y, slot.width, slot.height, true);
+  if (radius <= 0) {
+    renderer.drawRect(slot.x, slot.y, slot.width, slot.height, true);
+    return;
+  }
+  // Clear the image outside each quarter circle, then outline the rounded shape.
+  const int r = std::min(radius, std::min(slot.width, slot.height) / 2);
+  for (int dy = 0; dy < r; ++dy) {
+    for (int dx = 0; dx < r; ++dx) {
+      const int ox = r - dx;
+      const int oy = r - dy;
+      if (ox * ox + oy * oy <= r * r) continue;
+      renderer.drawPixel(slot.x + dx, slot.y + dy, false);
+      renderer.drawPixel(slot.x + slot.width - 1 - dx, slot.y + dy, false);
+      renderer.drawPixel(slot.x + dx, slot.y + slot.height - 1 - dy, false);
+      renderer.drawPixel(slot.x + slot.width - 1 - dx, slot.y + slot.height - 1 - dy, false);
+    }
+  }
+  renderer.drawRoundedRect(slot.x, slot.y, slot.width, slot.height, 1, r, true);
 }
 
 void drawFeaturedBook(const GfxRenderer& renderer, const RecentBook& book, const int percent, const int thumbHeight,
