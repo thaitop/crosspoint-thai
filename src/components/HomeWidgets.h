@@ -10,7 +10,7 @@
 
 class GfxRenderer;
 
-// Drawing pieces shared by the theme-drawn homes (Ledger, Today, Calendar).
+// Drawing pieces shared by the theme-drawn homes (Ledger, Today, Calendar, Shelf).
 namespace homeui {
 
 // Indexed by struct tm fields: tm_wday (0 = Sunday) and tm_mon.
@@ -39,6 +39,12 @@ void formatDuration(char* out, size_t size, uint32_t minutes);
 // outlined. Writes each cell's hit rect to targets[firstIndex + i].
 void drawToolBar(const GfxRenderer& renderer, const Tool* tools, int count, int firstIndex, int selected, Rect rect,
                  Rect* targets);
+// Capsule bar of the Shelf and Calendar homes, inset from the bottom of safe.
+Rect capsuleToolBarRect(int left, int width, Rect safe);
+// Icons in a rounded capsule; the selected tool widens into a black pill with
+// its label. Writes each cell's hit rect to targets[firstIndex + i].
+void drawCapsuleToolBar(const GfxRenderer& renderer, const Tool* tools, int count, int firstIndex, int selected,
+                        Rect rect, Rect* targets);
 // Outlined bar filled to percent (0-100).
 void drawProgressTrack(const GfxRenderer& renderer, Rect rect, int percent);
 // Cover thumb generated at thumbHeight, filled into slot; placeholder when

@@ -15,7 +15,6 @@
 #include "util/BookProgress.h"
 
 namespace {
-constexpr int TOOL_BAR_HEIGHT = 80;
 constexpr int TILE_HEIGHT = 136;
 constexpr int TILE_RADIUS = 14;
 constexpr int TILE_PAD = 12;
@@ -165,8 +164,8 @@ void CalendarHome::render(const GfxRenderer& renderer, const std::vector<RecentB
   const int width = safe.width - 2 * metrics.contentSidePadding;
   const int top = std::max(safe.y, metrics.topPadding + metrics.batteryBarHeight) + 8;
 
-  const Rect toolBar{safe.x, safe.y + safe.height - TOOL_BAR_HEIGHT, safe.width, TOOL_BAR_HEIGHT};
-  homeui::drawToolBar(renderer, tools, shownTools, bookCount, selected, toolBar, targets.data());
+  const Rect toolBar = homeui::capsuleToolBarRect(left, width, safe);
+  homeui::drawCapsuleToolBar(renderer, tools, shownTools, bookCount, selected, toolBar, targets.data());
   const int bodyBottom = toolBar.y - GAP;
 
   // Portrait stacks tiles, month and book; landscape puts the month beside them.

@@ -89,10 +89,10 @@ METALIO_SCRIPT = make_script("ENTER", "ENTER", "NEXT", "HOME", ["UP", "ENTER"])
 PICCO_SCRIPT = make_script("ENTER", "ENTER", "DOWN", "SWIPE:0.5,0.98,0.5,0.5", ["UP", "ENTER"])
 # EEGO A4 has only Up/Down/Power: touch for lists, the screen key for Home.
 # Taps: home "Files" tool, first file-list row, home "Settings" tool. The
-# Shelf home (uiTheme 8, CrossPointSettings::SHELF) has its tool bar lower than
-# Calendar's; keep TOOL_Y in step with TOOL_BAR_HEIGHT in src/components/ShelfHome.cpp.
-SHELF_THEME = os.environ.get("SIM_CHECK_UI_THEME") == "8"
-TOOL_Y = 0.947 if SHELF_THEME else 0.9
+# Calendar (default, 7) and Shelf (8) homes share the capsule tool bar; keep
+# TOOL_Y in step with CAPSULE_BAR_HEIGHT in src/components/HomeWidgets.cpp.
+CAPSULE_BAR = os.environ.get("SIM_CHECK_UI_THEME", "7") in ("7", "8")
+TOOL_Y = 0.947 if CAPSULE_BAR else 0.9
 EEGO_SCRIPT = make_script(f"TAP:0.12,{TOOL_Y}", "TAP:0.3,0.18", "DOWN", "HOME", [f"TAP:0.87,{TOOL_Y}"])
 
 

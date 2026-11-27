@@ -22,8 +22,6 @@ constexpr int CAPSULE_HEIGHT = 44;
 constexpr int CAPSULE_GAP = 14;
 constexpr int CARD_HEIGHT = CARD_PAD + ShelfHome::FEATURED_COVER_HEIGHT + CAPSULE_GAP + CAPSULE_HEIGHT + CARD_PAD;
 constexpr int FEATURED_COVER_WIDTH = ShelfHome::FEATURED_COVER_HEIGHT * 2 / 3;
-constexpr int TOOL_BAR_HEIGHT = 56;
-constexpr int TOOL_ICON = 32;
 constexpr int TRACK_HEIGHT = 8;
 constexpr int SECTION_GAP = 16;
 constexpr int DOT_SIZE = 10;
@@ -50,7 +48,7 @@ Layout layoutFor(const GfxRenderer& renderer) {
   const int width = safe.width - 2 * metrics.contentSidePadding;
   const int top = std::max(safe.y, metrics.topPadding + metrics.batteryBarHeight) + 8;
   Layout l;
-  l.tools = Rect{left, safe.y + safe.height - TOOL_BAR_HEIGHT - 8, width, TOOL_BAR_HEIGHT};
+  l.tools = homeui::capsuleToolBarRect(left, width, safe);
   l.activity = Rect{left, l.tools.y - SECTION_GAP - shelf::heatGridHeight(), width, shelf::heatGridHeight()};
   l.card = Rect{left, top, width, CARD_HEIGHT};
   const int recentY = l.card.y + l.card.height + SECTION_GAP;
@@ -107,7 +105,7 @@ void ShelfHome::render(const GfxRenderer& renderer, const std::vector<RecentBook
   if (bookCount > 0) targets[0] = l.card;
   if (recentTotal > 0) drawRecent(renderer, books, l.recent, l.coverHeight, selected);
   drawActivity(renderer, l.activity);
-  drawToolBar(renderer, tools, shownTools, bookCount, selected, l.tools);
+  homeui::drawCapsuleToolBar(renderer, tools, shownTools, bookCount, selected, l.tools, targets.data());
 }
 
 int ShelfHome::turnPage(const int selected, const int dir) {
@@ -305,59 +303,6 @@ void ShelfHome::drawActivity(const GfxRenderer& renderer, const Rect rect) const
   renderer.drawText(UI_10_FONT_ID, x, y, renderer.truncatedText(UI_10_FONT_ID, totalLine, w).c_str(), true);
   y += smallH;
   renderer.drawText(UI_10_FONT_ID, x, y, renderer.truncatedText(UI_10_FONT_ID, daysLine, w).c_str(), true);
-}
-
-void ShelfHome::drawToolBar(const GfxRenderer& renderer, const Tool* tools, const int count, const int firstIndex,
-                            const int selected, const Rect rect) {
-  if (count <= 0) return;
-  renderer.drawRoundedRect(rect.x, rect.y, rect.width, rect.height, 2, rect.height / 2, true);
-  const int inner = rect.width - 8;
-  const int active = selected - firstIndex;
-  const bool hasActive = active >= 0 && active < count;
-
-  // The selected tool widens to fit its label; the others share the rest.
-  int activeW = 0;
-  std::string activeLabel;
-  if (hasActive) {
-    const int maxW = inner / 2;
-    activeLabel =
-        renderer.truncatedText(UI_10_FONT_ID, tools[active].label, maxW - TOOL_ICON - 34, EpdFontFamily::BOLD);
-    const int contentW = TOOL_ICON + 6 + renderer.getTextWidth(UI_10_FONT_ID, activeLabel.c_str(), EpdFontFamily::BOLD);
-    activeW = std::max(inner / count, std::min(maxW, contentW + 28));
-  }
-  const int otherCount = hasActive ? count - 1 : count;
-  const int otherW = otherCount > 0 ? (inner - activeW) / otherCount : 0;
-
-  int x = rect.x + 4;
-  const int cellY = rect.y + 4;
-  const int cellH = rect.height - 8;
-  for (int i = 0; i < count; ++i) {
-    const bool isActive = hasActive && i == active;
-    // The last cell takes the rounding remainder so the bar has no dead edge.
-    const int cellW = i == count - 1 ? rect.x + 4 + inner - x : (isActive ? activeW : otherW);
-    const uint8_t* icon = homeui::toolIcon(tools[i].icon);
-    const int iconY = cellY + (cellH - TOOL_ICON) / 2;
-    if (isActive) {
-      renderer.fillRoundedRect(x, cellY, cellW, cellH, cellH / 2, Color::Black);
-      const int labelW = renderer.getTextWidth(UI_10_FONT_ID, activeLabel.c_str(), EpdFontFamily::BOLD);
-      const int contentW = (icon ? TOOL_ICON + 6 : 0) + labelW;
-      int cx = x + (cellW - contentW) / 2;
-      if (icon) {
-        renderer.drawIcon(icon, cx, iconY, TOOL_ICON, false);
-        cx += TOOL_ICON + 6;
-      }
-      renderer.drawText(UI_10_FONT_ID, cx, cellY + (cellH - renderer.getLineHeight(UI_10_FONT_ID)) / 2,
-                        activeLabel.c_str(), false, EpdFontFamily::BOLD);
-    } else if (icon) {
-      renderer.drawIcon(icon, x + (cellW - TOOL_ICON) / 2, iconY, TOOL_ICON);
-    } else {
-      const std::string label = renderer.truncatedText(UI_10_FONT_ID, tools[i].label, cellW - 8);
-      UITheme::drawCenteredText(renderer, Rect{x, cellY, cellW, cellH}, UI_10_FONT_ID,
-                                cellY + (cellH - renderer.getLineHeight(UI_10_FONT_ID)) / 2, label.c_str());
-    }
-    targets[firstIndex + i] = Rect{x, rect.y, cellW, rect.height};
-    x += cellW;
-  }
 }
 
 int ShelfHome::hitTest(const int x, const int y) const {

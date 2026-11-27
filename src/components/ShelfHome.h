@@ -46,7 +46,6 @@ class ShelfHome {
   void drawRecent(const GfxRenderer& renderer, const std::vector<RecentBook>& books, Rect rect, int coverHeight,
                   int selected);
   void drawActivity(const GfxRenderer& renderer, Rect rect) const;
-  void drawToolBar(const GfxRenderer& renderer, const Tool* tools, int count, int firstIndex, int selected, Rect rect);
 
   std::array<int8_t, MAX_BOOKS> progress = [] {
     std::array<int8_t, MAX_BOOKS> unknown{};

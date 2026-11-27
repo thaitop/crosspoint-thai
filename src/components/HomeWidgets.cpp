@@ -23,6 +23,8 @@ constexpr int ICON_SIZE = 32;
 constexpr int RADIUS = 6;
 constexpr int SELECTION_LINE = 2;
 constexpr int BUTTON_HEIGHT = 44;
+constexpr int CAPSULE_BAR_HEIGHT = 56;
+constexpr int CAPSULE_BAR_MARGIN = 8;
 #ifndef OMIT_FONTS
 constexpr int PERCENT_FONT_ID = NOTOSANS_18_FONT_ID;
 #else
@@ -84,6 +86,63 @@ void drawToolBar(const GfxRenderer& renderer, const Tool* tools, const int count
       renderer.drawRoundedRect(cell.x + 4, cell.y + 4, cell.width - 8, cell.height - 8, SELECTION_LINE, RADIUS, true);
     }
     targets[firstIndex + i] = cell;
+  }
+}
+
+Rect capsuleToolBarRect(const int left, const int width, const Rect safe) {
+  return Rect{left, safe.y + safe.height - CAPSULE_BAR_HEIGHT - CAPSULE_BAR_MARGIN, width, CAPSULE_BAR_HEIGHT};
+}
+
+void drawCapsuleToolBar(const GfxRenderer& renderer, const Tool* tools, const int count, const int firstIndex,
+                        const int selected, const Rect rect, Rect* targets) {
+  if (count <= 0) return;
+  renderer.drawRoundedRect(rect.x, rect.y, rect.width, rect.height, 2, rect.height / 2, true);
+  const int inner = rect.width - 8;
+  const int active = selected - firstIndex;
+  const bool hasActive = active >= 0 && active < count;
+
+  // The selected tool widens to fit its label; the others share the rest.
+  int activeW = 0;
+  std::string activeLabel;
+  if (hasActive) {
+    const int maxW = inner / 2;
+    activeLabel =
+        renderer.truncatedText(UI_10_FONT_ID, tools[active].label, maxW - ICON_SIZE - 34, EpdFontFamily::BOLD);
+    const int contentW = ICON_SIZE + 6 + renderer.getTextWidth(UI_10_FONT_ID, activeLabel.c_str(), EpdFontFamily::BOLD);
+    activeW = std::max(inner / count, std::min(maxW, contentW + 28));
+  }
+  const int otherCount = hasActive ? count - 1 : count;
+  const int otherW = otherCount > 0 ? (inner - activeW) / otherCount : 0;
+
+  int x = rect.x + 4;
+  const int cellY = rect.y + 4;
+  const int cellH = rect.height - 8;
+  for (int i = 0; i < count; ++i) {
+    const bool isActive = hasActive && i == active;
+    // The last cell takes the rounding remainder so the bar has no dead edge.
+    const int cellW = i == count - 1 ? rect.x + 4 + inner - x : (isActive ? activeW : otherW);
+    const uint8_t* icon = toolIcon(tools[i].icon);
+    const int iconY = cellY + (cellH - ICON_SIZE) / 2;
+    if (isActive) {
+      renderer.fillRoundedRect(x, cellY, cellW, cellH, cellH / 2, Color::Black);
+      const int labelW = renderer.getTextWidth(UI_10_FONT_ID, activeLabel.c_str(), EpdFontFamily::BOLD);
+      const int contentW = (icon ? ICON_SIZE + 6 : 0) + labelW;
+      int cx = x + (cellW - contentW) / 2;
+      if (icon) {
+        renderer.drawIcon(icon, cx, iconY, ICON_SIZE, false);
+        cx += ICON_SIZE + 6;
+      }
+      renderer.drawText(UI_10_FONT_ID, cx, cellY + (cellH - renderer.getLineHeight(UI_10_FONT_ID)) / 2,
+                        activeLabel.c_str(), false, EpdFontFamily::BOLD);
+    } else if (icon) {
+      renderer.drawIcon(icon, x + (cellW - ICON_SIZE) / 2, iconY, ICON_SIZE);
+    } else {
+      const std::string label = renderer.truncatedText(UI_10_FONT_ID, tools[i].label, cellW - 8);
+      UITheme::drawCenteredText(renderer, Rect{x, cellY, cellW, cellH}, UI_10_FONT_ID,
+                                cellY + (cellH - renderer.getLineHeight(UI_10_FONT_ID)) / 2, label.c_str());
+    }
+    targets[firstIndex + i] = Rect{x, rect.y, cellW, rect.height};
+    x += cellW;
   }
 }
 
