@@ -245,7 +245,7 @@ code {
   background: #fff;
 }
 
-/* Hero: centred copy, then a fan of the three Home themes. */
+/* Hero: centred copy, then a fan of the four Home themes. */
 .hero {
   padding-top: clamp(56px, 9vw, 120px);
 }
@@ -322,17 +322,27 @@ code {
 }
 .fan-center {
   z-index: 2;
+  width: clamp(140px, 19vw, 260px) !important;
+}
+.fan-center-left {
+  rotate: -2deg;
+  margin-right: -10px;
+}
+.fan-center-right {
+  rotate: 2deg;
+  margin-left: -10px;
+  margin-top: 16px;
 }
 .fan-side {
-  margin-top: 56px;
-  width: clamp(120px, 18vw, 240px) !important;
+  margin-top: 64px;
+  width: clamp(110px, 15vw, 210px) !important;
 }
 .fan-left {
-  rotate: -6deg;
+  rotate: -7deg;
   margin-right: -28px;
 }
 .fan-right {
-  rotate: 6deg;
+  rotate: 7deg;
   margin-left: -28px;
 }
 .fan-caption {
@@ -834,17 +844,24 @@ details.sd ol li + li {
     border-radius: 8px;
   }
   .fan-center {
-    width: 46vw !important;
+    width: 32vw !important;
+  }
+  .fan-center-left {
+    margin-right: -1vw;
+  }
+  .fan-center-right {
+    margin-left: -1vw;
+    margin-top: 12px;
   }
   .fan-side {
-    width: 34vw !important;
-    margin-top: 40px;
+    width: 25vw !important;
+    margin-top: 44px;
   }
   .fan-left {
-    margin-right: -40px;
+    margin-right: -8vw;
   }
   .fan-right {
-    margin-left: -40px;
+    margin-left: -8vw;
   }
   .fan-caption span {
     display: block;

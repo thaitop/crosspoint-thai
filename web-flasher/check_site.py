@@ -13,6 +13,7 @@ from pathlib import Path
 IMAGES = [
     "home-calendar.png",
     "home-ledger.png",
+    "home-shelf.png",
     "home-today.png",
     "reader-thai.png",
     "settings-thai.png",

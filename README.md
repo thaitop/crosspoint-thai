@@ -19,12 +19,14 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
 
 ## ภาพหน้าจอ
 
-ภาพจาก Metalio E-Ink4-Plus ยกเว้นหน้า Home ธีม Calendar ซึ่งเป็นภาพจาก emulator ของ X4 Pro
+ภาพจาก Metalio E-Ink4-Plus
 
-| หน้า Home: Calendar | หน้า Home: Ledger | หน้า Home: Today |
+| หน้า Home: Calendar | หน้า Home: Shelf | หน้า Home: Ledger | หน้า Home: Today |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/images/thai/home-calendar.png" width="180" alt="หน้า Home ธีม Calendar"> | <img src="docs/images/thai/home-shelf.png" width="180" alt="หน้า Home ธีม Shelf"> | <img src="docs/images/thai/home-ledger.png" width="180" alt="หน้า Home ธีม Ledger"> | <img src="docs/images/thai/home-today.png" width="180" alt="หน้า Home ธีม Today"> |
+
+| อ่านหนังสือภาษาไทย | เมนูภาษาไทย | หน้าจอพักปฏิทินไทย |
 | :---: | :---: | :---: |
-| <img src="docs/images/thai/home-calendar.png" width="200" alt="หน้า Home ธีม Calendar"> | <img src="docs/images/thai/home-ledger.png" width="200" alt="หน้า Home ธีม Ledger"> | <img src="docs/images/thai/home-today.png" width="200" alt="หน้า Home ธีม Today"> |
-| **อ่านหนังสือภาษาไทย** | **เมนูภาษาไทย** | **หน้าจอพักปฏิทินไทย** |
 | <img src="docs/images/thai/reader-thai.png" width="200" alt="หน้าหนังสือภาษาไทย"> | <img src="docs/images/thai/settings-thai.png" width="200" alt="เมนูตั้งค่าภาษาไทย"> | <img src="docs/images/thai/sleep-thai-calendar.png" width="200" alt="หน้าจอพักปฏิทินไทย"> |
 
 ---
@@ -65,8 +67,9 @@ KOReader sync, plugin ฯลฯ) ดูรายละเอียดได้�
     เทาอ่อนเมื่อต่ำกว่า 60 นาที เทาเข้มเมื่อต่ำกว่า 120 นาที และสีดำเมื่อ 120 นาทีขึ้นไป
   - วันที่ผ่านมาแต่ไม่ได้อ่านมีวงเส้นเทาล้อม วันนี้มีวงล้อมและจุดดำมุมขวาบน
   - แตะวันที่ผ่านมาเพื่อดูเวลาที่อ่านของวันนั้น ถ้าไม่ได้แตะจะแสดงจำนวนวันที่อ่านต่อเนื่อง
+  - หนังสือเล่มปัจจุบันปกมุมโค้ง แถบความคืบหน้าแบบแคปซูลพร้อมเปอร์เซ็นต์ ปุ่มอ่านต่อแบบแคปซูล
   - แถบเครื่องมือแบบแคปซูลด้านล่าง เหมือนธีม Shelf
-- **Shelf (ชั้นหนังสือ)** — การ์ดหนังสือเล่มปัจจุบัน พร้อมความคืบหน้าและปุ่มอ่านต่อแบบแคปซูล
+- **Shelf (ชั้นหนังสือ)** — การ์ดหนังสือเล่มปัจจุบัน พร้อมแถบความคืบหน้าและปุ่มอ่านต่อแบบแคปซูล
   แถว "อ่านล่าสุด" ปกมุมโค้งไม่เกิน 9 เล่ม แสดงหน้าละ 3 เล่ม (จอแคบ 2 เล่ม)
   ปัดซ้าย/ขวาหรือกดเลื่อนเลยปกสุดท้ายเพื่อเปลี่ยนหน้า และแถบเครื่องมือแบบแคปซูลด้านล่าง
   - ตารางการอ่าน 30 วันล่าสุด (2 แถว แถวละ 15 วัน วันนี้อยู่มุมขวาล่าง) สีเข้มขึ้นตามเวลาอ่าน
