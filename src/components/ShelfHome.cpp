@@ -20,16 +20,17 @@ constexpr int CARD_RADIUS = 18;
 constexpr int COVER_RADIUS = 8;
 constexpr int CAPSULE_HEIGHT = 44;
 constexpr int CAPSULE_GAP = 14;
-constexpr int CARD_HEIGHT = CARD_PAD + ShelfHome::FEATURED_COVER_HEIGHT + CAPSULE_GAP + CAPSULE_HEIGHT + CARD_PAD;
-constexpr int FEATURED_COVER_WIDTH = ShelfHome::FEATURED_COVER_HEIGHT * 2 / 3;
-constexpr int TRACK_HEIGHT = 8;
+// Card height without its cover.
+constexpr int CARD_CHROME = CARD_PAD + CAPSULE_GAP + CAPSULE_HEIGHT + CARD_PAD;
+constexpr int TRACK_HEIGHT = 12;
 constexpr int SECTION_GAP = 16;
 constexpr int DOT_SIZE = 10;
 constexpr int DOT_GAP = 10;
 constexpr int DOT_ROW = DOT_SIZE + 12;
+constexpr int SUMMARY_GAP = 12;
 // Below this the recent row is left out rather than drawn as slivers.
 constexpr int MIN_RECENT_COVER = 60;
-static_assert(shelf::HEAT_WEEKS * 7 <= ReadingHistory::DAYS, "activity grid reaches past the reading history");
+static_assert(shelf::HEAT_DAYS <= ReadingHistory::DAYS, "activity grid reaches past the reading history");
 
 struct Layout {
   Rect card;
@@ -37,6 +38,7 @@ struct Layout {
   Rect activity;
   Rect tools;
   int columns = 3;
+  int featuredHeight = ShelfHome::FEATURED_COVER_HEIGHT;
   int coverHeight = 0;  // 0 when the recent row does not fit
 };
 
@@ -49,17 +51,23 @@ Layout layoutFor(const GfxRenderer& renderer) {
   const int top = std::max(safe.y, metrics.topPadding + metrics.batteryBarHeight) + 8;
   Layout l;
   l.tools = homeui::capsuleToolBarRect(left, width, safe);
-  l.activity = Rect{left, l.tools.y - SECTION_GAP - shelf::heatGridHeight(), width, shelf::heatGridHeight()};
-  l.card = Rect{left, top, width, CARD_HEIGHT};
-  const int recentY = l.card.y + l.card.height + SECTION_GAP;
-  l.recent = Rect{left, recentY, width, l.activity.y - SECTION_GAP - recentY};
-
+  // A summary line and the grid below it.
+  const int activityH =
+      renderer.getLineHeight(UI_10_FONT_ID) + SUMMARY_GAP + shelf::heatGridHeight(shelf::heatCell(width));
+  l.activity = Rect{left, l.tools.y - SECTION_GAP - activityH, width, activityH};
   l.columns = shelf::recentColumns(width);
   const int tileW = (width - (l.columns - 1) * shelf::TILE_GAP) / l.columns;
   const int textH = 6 + renderer.getLineHeight(UI_10_FONT_ID) + 6 + renderer.getLineHeight(UI_10_FONT_ID);
   const int headingH = renderer.getLineHeight(UI_12_FONT_ID) + 10;
-  const int coverH = std::min(tileW * 3 / 2, l.recent.height - headingH - textH - DOT_ROW);
+  // The featured and recent covers share one height, splitting the free space.
+  const int freeH = l.activity.y - SECTION_GAP - top - CARD_CHROME - SECTION_GAP - headingH - textH - DOT_ROW;
+  const int coverH = std::min(tileW * 3 / 2, freeH / 2);
   l.coverHeight = coverH >= MIN_RECENT_COVER ? coverH : 0;
+  if (l.coverHeight > 0) l.featuredHeight = l.coverHeight;
+
+  l.card = Rect{left, top, width, CARD_CHROME + l.featuredHeight};
+  const int recentY = l.card.y + l.card.height + SECTION_GAP;
+  l.recent = Rect{left, recentY, width, l.activity.y - SECTION_GAP - recentY};
   return l;
 }
 
@@ -70,14 +78,15 @@ void drawPercentRow(const GfxRenderer& renderer, const int x, const int y, const
   const int lineH = renderer.getLineHeight(UI_10_FONT_ID);
   const int trackW = w - textW - 8;
   if (trackW > 0) {
-    homeui::drawProgressTrack(renderer, Rect{x, y + (lineH - TRACK_HEIGHT) / 2, trackW, TRACK_HEIGHT}, percent);
+    homeui::drawProgressTrack(renderer, Rect{x, y + (lineH - TRACK_HEIGHT) / 2, trackW, TRACK_HEIGHT}, percent, true);
   }
   renderer.drawText(UI_10_FONT_ID, x + w - textW, y, text, true, EpdFontFamily::BOLD);
 }
 }  // namespace
 
 int ShelfHome::coverHeightFor(const GfxRenderer& renderer, const size_t index) {
-  return index == 0 ? FEATURED_COVER_HEIGHT : layoutFor(renderer).coverHeight;
+  const Layout l = layoutFor(renderer);
+  return index == 0 ? l.featuredHeight : l.coverHeight;
 }
 
 int ShelfHome::maxBooks(const GfxRenderer& renderer) { return layoutFor(renderer).coverHeight > 0 ? MAX_BOOKS : 1; }
@@ -101,7 +110,7 @@ void ShelfHome::render(const GfxRenderer& renderer, const std::vector<RecentBook
   GUI.drawHeader(renderer, Rect{0, metrics.topPadding, renderer.getScreenWidth(), metrics.batteryBarHeight}, nullptr,
                  nullptr, false);
 
-  drawCard(renderer, bookCount > 0 ? &books[0] : nullptr, l.card, selected == 0 && bookCount > 0);
+  drawCard(renderer, bookCount > 0 ? &books[0] : nullptr, l.card, l.featuredHeight, selected == 0 && bookCount > 0);
   if (bookCount > 0) targets[0] = l.card;
   if (recentTotal > 0) drawRecent(renderer, books, l.recent, l.coverHeight, selected);
   drawActivity(renderer, l.activity);
@@ -117,7 +126,7 @@ int ShelfHome::turnPage(const int selected, const int dir) {
   return selected >= 1 && selected <= recentTotal ? 1 + page * columns : selected;
 }
 
-void ShelfHome::drawCard(const GfxRenderer& renderer, const RecentBook* book, const Rect rect,
+void ShelfHome::drawCard(const GfxRenderer& renderer, const RecentBook* book, const Rect rect, const int coverHeight,
                          const bool selected) const {
   renderer.drawRoundedRect(rect.x, rect.y, rect.width, rect.height, selected ? 4 : 2, CARD_RADIUS, true);
   if (!book) {
@@ -128,8 +137,8 @@ void ShelfHome::drawCard(const GfxRenderer& renderer, const RecentBook* book, co
     return;
   }
 
-  const Rect cover{rect.x + CARD_PAD, rect.y + CARD_PAD, FEATURED_COVER_WIDTH, FEATURED_COVER_HEIGHT};
-  homeui::drawCover(renderer, *book, FEATURED_COVER_HEIGHT, cover, COVER_RADIUS);
+  const Rect cover{rect.x + CARD_PAD, rect.y + CARD_PAD, coverHeight * 2 / 3, coverHeight};
+  homeui::drawCover(renderer, *book, coverHeight, cover, COVER_RADIUS);
 
   const int x = cover.x + cover.width + CARD_PAD;
   const int w = rect.x + rect.width - CARD_PAD - x;
@@ -147,11 +156,22 @@ void ShelfHome::drawCard(const GfxRenderer& renderer, const RecentBook* book, co
     if (shelf::showReadingLine(hasDate, minutes, streak)) {
       char duration[32];
       homeui::formatDuration(duration, sizeof(duration), static_cast<uint32_t>(minutes));
+      char today[96];
+      char streakText[64];
+      snprintf(today, sizeof(today), "%s %s", tr(STR_SHELF_READ_TODAY), duration);
+      snprintf(streakText, sizeof(streakText), "%s %d %s", tr(STR_SHELF_STREAK), streak, tr(STR_UNIT_DAYS));
       char line[160];
-      snprintf(line, sizeof(line), "%s %s · %s %d %s", tr(STR_SHELF_READ_TODAY), duration, tr(STR_SHELF_STREAK), streak,
-               tr(STR_UNIT_DAYS));
-      bottom -= smallH;
-      renderer.drawText(UI_10_FONT_ID, x, bottom, renderer.truncatedText(UI_10_FONT_ID, line, w).c_str(), true);
+      snprintf(line, sizeof(line), "%s · %s", today, streakText);
+      // Too wide for one line: today's time above the streak.
+      if (renderer.getTextWidth(UI_10_FONT_ID, line) <= w) {
+        bottom -= smallH;
+        renderer.drawText(UI_10_FONT_ID, x, bottom, line, true);
+      } else {
+        bottom -= smallH;
+        renderer.drawText(UI_10_FONT_ID, x, bottom, renderer.truncatedText(UI_10_FONT_ID, streakText, w).c_str(), true);
+        bottom -= smallH;
+        renderer.drawText(UI_10_FONT_ID, x, bottom, renderer.truncatedText(UI_10_FONT_ID, today, w).c_str(), true);
+      }
       bottom -= 6;
     }
     if (progress[0] >= 0) {
@@ -250,59 +270,56 @@ void ShelfHome::drawActivity(const GfxRenderer& renderer, const Rect rect) const
     return;
   }
   const int32_t today = ReadingLogStore::dayNumber(date);
-  // Columns are weeks from Sunday; the last column is this week.
-  const int32_t firstDay = today - ReadingLogStore::weekday(today) - (shelf::HEAT_WEEKS - 1) * 7;
-  constexpr int step = shelf::HEAT_CELL + shelf::HEAT_GAP;
+  // Summary line: title on the left, total time and reading days on the right.
   uint32_t total = 0;
   int readingDays = 0;
-  for (int week = 0; week < shelf::HEAT_WEEKS; ++week) {
-    for (int weekday = 0; weekday < 7; ++weekday) {
-      const int32_t day = firstDay + week * 7 + weekday;
-      if (day > today) break;
-      const int minutes = READING_LOG.historyMinutes(day);
-      total += minutes;
-      if (minutes > 0) ++readingDays;
-      const int x = rect.x + week * step;
-      const int y = rect.y + weekday * step;
-      constexpr int cell = shelf::HEAT_CELL;
-      switch (shelf::heatLevel(minutes)) {
-        case 0:
-          renderer.drawRoundedRect(x, y, cell, cell, 1, 2, true);
-          break;
-        case 1:
-          renderer.fillRectDither(x, y, cell, cell, Color::LightGray);
-          renderer.drawRoundedRect(x, y, cell, cell, 1, 2, true);
-          break;
-        case 2:
-          renderer.fillRectDither(x, y, cell, cell, Color::DarkGray);
-          renderer.drawRoundedRect(x, y, cell, cell, 1, 2, true);
-          break;
-        default:
-          renderer.fillRoundedRect(x, y, cell, cell, 2, Color::Black);
-          break;
-      }
-    }
+  for (int i = 0; i < shelf::HEAT_DAYS; ++i) {
+    const int minutes = READING_LOG.historyMinutes(today - (shelf::HEAT_DAYS - 1) + i);
+    total += minutes;
+    if (minutes > 0) ++readingDays;
   }
-
-  // Summary beside the grid: title, total time, reading days.
-  const int x = rect.x + shelf::heatGridWidth() + 24;
-  const int w = rect.x + rect.width - x;
-  if (w <= 40) return;
-  const int smallH = renderer.getLineHeight(UI_10_FONT_ID);
   char duration[32];
   homeui::formatDuration(duration, sizeof(duration), total);
-  char totalLine[64];
-  snprintf(totalLine, sizeof(totalLine), "%s %s", tr(STR_SHELF_TOTAL), duration);
-  char daysLine[64];
-  snprintf(daysLine, sizeof(daysLine), "%s %d %s", tr(STR_SHELF_READ_DAYS), readingDays, tr(STR_UNIT_DAYS));
-  int y = rect.y + (rect.height - 3 * smallH - 8) / 2;
-  renderer.drawText(UI_10_FONT_ID, x, y,
-                    renderer.truncatedText(UI_10_FONT_ID, tr(STR_SHELF_LAST_3_MONTHS), w, EpdFontFamily::BOLD).c_str(),
-                    true, EpdFontFamily::BOLD);
-  y += smallH + 8;
-  renderer.drawText(UI_10_FONT_ID, x, y, renderer.truncatedText(UI_10_FONT_ID, totalLine, w).c_str(), true);
-  y += smallH;
-  renderer.drawText(UI_10_FONT_ID, x, y, renderer.truncatedText(UI_10_FONT_ID, daysLine, w).c_str(), true);
+  char stats[96];
+  snprintf(stats, sizeof(stats), "%s %s · %s %d %s", tr(STR_SHELF_TOTAL), duration, tr(STR_SHELF_READ_DAYS),
+           readingDays, tr(STR_UNIT_DAYS));
+  const char* title = tr(STR_SHELF_LAST_30_DAYS);
+  const int titleW = renderer.getTextWidth(UI_10_FONT_ID, title, EpdFontFamily::BOLD);
+  renderer.drawText(UI_10_FONT_ID, rect.x, rect.y, title, true, EpdFontFamily::BOLD);
+  const int statsSpace = rect.width - titleW - 16;
+  if (statsSpace > 40) {
+    const std::string text = renderer.truncatedText(UI_10_FONT_ID, stats, statsSpace);
+    renderer.drawText(UI_10_FONT_ID, rect.x + rect.width - renderer.getTextWidth(UI_10_FONT_ID, text.c_str()), rect.y,
+                      text.c_str(), true);
+  }
+
+  // Grid centred under the summary.
+  const int cell = shelf::heatCell(rect.width);
+  const int step = cell + shelf::HEAT_GAP;
+  const int gridX = rect.x + (rect.width - shelf::heatGridWidth(cell)) / 2;
+  const int gridY = rect.y + rect.height - shelf::heatGridHeight(cell);
+  const int radius = std::max(2, cell / 6);
+  for (int i = 0; i < shelf::HEAT_DAYS; ++i) {
+    const int minutes = READING_LOG.historyMinutes(today - (shelf::HEAT_DAYS - 1) + i);
+    const int x = gridX + (i % shelf::HEAT_COLUMNS) * step;
+    const int y = gridY + (i / shelf::HEAT_COLUMNS) * step;
+    switch (shelf::heatLevel(minutes)) {
+      case 0:
+        renderer.drawRoundedRect(x, y, cell, cell, 1, radius, true);
+        break;
+      case 1:
+        renderer.fillRectDither(x, y, cell, cell, Color::LightGray);
+        renderer.drawRoundedRect(x, y, cell, cell, 1, radius, true);
+        break;
+      case 2:
+        renderer.fillRectDither(x, y, cell, cell, Color::DarkGray);
+        renderer.drawRoundedRect(x, y, cell, cell, 1, radius, true);
+        break;
+      default:
+        renderer.fillRoundedRect(x, y, cell, cell, radius, Color::Black);
+        break;
+    }
+  }
 }
 
 int ShelfHome::hitTest(const int x, const int y) const {

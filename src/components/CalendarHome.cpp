@@ -193,7 +193,8 @@ void CalendarHome::render(const GfxRenderer& renderer, const std::vector<RecentB
   drawMonth(renderer, month, hasDate ? &date : nullptr);
 
   if (bookCount > 0) {
-    homeui::drawFeaturedBook(renderer, books[0], currentProgress, COVER_HEIGHT, book, selected == 0, false);
+    homeui::drawFeaturedBook(renderer, books[0], currentProgress, COVER_HEIGHT, book, selected == 0,
+                             homeui::FeaturedStyle::Pill);
     targets[0] = book;
   } else {
     const int lineHeight = renderer.getLineHeight(UI_12_FONT_ID);

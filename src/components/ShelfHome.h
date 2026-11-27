@@ -20,6 +20,8 @@ class ShelfHome {
  public:
   static constexpr int MAX_BOOKS = 1 + shelf::MAX_RECENT;
   static constexpr int MAX_TOOLS = 5;
+  // Featured cover height when the recent row does not fit; otherwise the
+  // featured and recent covers share the recent row's height.
   static constexpr int FEATURED_COVER_HEIGHT = 140;
 
   using Tool = homeui::Tool;
@@ -42,7 +44,7 @@ class ShelfHome {
   int hitTest(int x, int y) const;
 
  private:
-  void drawCard(const GfxRenderer& renderer, const RecentBook* book, Rect rect, bool selected) const;
+  void drawCard(const GfxRenderer& renderer, const RecentBook* book, Rect rect, int coverHeight, bool selected) const;
   void drawRecent(const GfxRenderer& renderer, const std::vector<RecentBook>& books, Rect rect, int coverHeight,
                   int selected);
   void drawActivity(const GfxRenderer& renderer, Rect rect) const;

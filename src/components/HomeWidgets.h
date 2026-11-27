@@ -45,16 +45,19 @@ Rect capsuleToolBarRect(int left, int width, Rect safe);
 // its label. Writes each cell's hit rect to targets[firstIndex + i].
 void drawCapsuleToolBar(const GfxRenderer& renderer, const Tool* tools, int count, int firstIndex, int selected,
                         Rect rect, Rect* targets);
-// Outlined bar filled to percent (0-100).
-void drawProgressTrack(const GfxRenderer& renderer, Rect rect, int percent);
+// Outlined bar filled to percent (0-100); pill rounds both ends.
+void drawProgressTrack(const GfxRenderer& renderer, Rect rect, int percent, bool pill = false);
 // Cover thumb generated at thumbHeight, filled into slot; placeholder when
 // missing. A radius rounds the corners and the border; the cut corners are
 // cleared to white, so draw it on a white background.
 void drawCover(const GfxRenderer& renderer, const RecentBook& book, int thumbHeight, Rect slot, int radius = 0);
+// Classic: square cover, a large percent figure under the bar, rounded-rect
+// button. Pill: rounded cover, a pill bar right under the title and author
+// with the percent on its line, and a pill button.
+enum class FeaturedStyle { Classic, Pill };
 // Cover with title, author, progress (percent -1 = unknown) and a resume
-// button that is filled when selected. Without percentText the bar alone
-// carries the progress, directly under the title and author.
+// button that is filled when selected.
 void drawFeaturedBook(const GfxRenderer& renderer, const RecentBook& book, int percent, int thumbHeight, Rect rect,
-                      bool selected, bool percentText = true);
+                      bool selected, FeaturedStyle style = FeaturedStyle::Classic);
 
 }  // namespace homeui

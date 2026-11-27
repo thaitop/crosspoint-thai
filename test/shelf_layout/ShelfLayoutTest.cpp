@@ -40,8 +40,11 @@ TEST(ShelfLayout, HeatLevelsMatchCalendarTheme) {
 }
 
 TEST(ShelfLayout, HeatGridSize) {
-  EXPECT_EQ(shelf::heatGridWidth(), 13 * 12 + 12 * 3);
-  EXPECT_EQ(shelf::heatGridHeight(), 7 * 12 + 6 * 3);
+  EXPECT_EQ(shelf::HEAT_ROWS, 2);
+  EXPECT_EQ(shelf::heatCell(14 * 5 + 15 * 20), 20);
+  EXPECT_EQ(shelf::heatCell(2000), shelf::HEAT_MAX_CELL);
+  EXPECT_EQ(shelf::heatGridWidth(20), 15 * 20 + 14 * 5);
+  EXPECT_EQ(shelf::heatGridHeight(20), 2 * 20 + 5);
 }
 
 TEST(ShelfLayout, ReadingLineNeedsDateAndActivity) {

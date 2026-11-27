@@ -9,7 +9,8 @@
 // Days are counted from 1970-01-01.
 class ReadingHistory {
  public:
-  static constexpr int DAYS = 91;  // 13 weeks
+  // Kept at 91 so saved logs load unchanged; Shelf shows the last 30.
+  static constexpr int DAYS = 91;
 
   // Records the day's total reading. Under a minute counts as no reading.
   // A later day moves the window and clears the days it skipped; days that

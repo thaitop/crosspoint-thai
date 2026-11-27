@@ -23,6 +23,8 @@ constexpr int ICON_SIZE = 32;
 constexpr int RADIUS = 6;
 constexpr int SELECTION_LINE = 2;
 constexpr int BUTTON_HEIGHT = 44;
+constexpr int PILL_COVER_RADIUS = 8;
+constexpr int PILL_TRACK_HEIGHT = 12;
 constexpr int CAPSULE_BAR_HEIGHT = 56;
 constexpr int CAPSULE_BAR_MARGIN = 8;
 #ifndef OMIT_FONTS
@@ -146,10 +148,22 @@ void drawCapsuleToolBar(const GfxRenderer& renderer, const Tool* tools, const in
   }
 }
 
-void drawProgressTrack(const GfxRenderer& renderer, const Rect rect, const int percent) {
-  renderer.drawRect(rect.x, rect.y, rect.width, rect.height, true);
-  const int fill = (rect.width - 2) * std::clamp(percent, 0, 100) / 100;
-  if (fill > 0) renderer.fillRect(rect.x + 1, rect.y + 1, fill, rect.height - 2, true);
+void drawProgressTrack(const GfxRenderer& renderer, const Rect rect, const int percent, const bool pill) {
+  if (!pill) {
+    renderer.drawRect(rect.x, rect.y, rect.width, rect.height, true);
+    const int fill = (rect.width - 2) * std::clamp(percent, 0, 100) / 100;
+    if (fill > 0) renderer.fillRect(rect.x + 1, rect.y + 1, fill, rect.height - 2, true);
+    return;
+  }
+  renderer.drawRoundedRect(rect.x, rect.y, rect.width, rect.height, 1, rect.height / 2, true);
+  // A gap of one pixel inside the outline; a short fill keeps its round ends.
+  const int innerH = rect.height - 4;
+  const int innerW = rect.width - 4;
+  const int fill = innerW * std::clamp(percent, 0, 100) / 100;
+  if (fill > 0 && innerH > 0) {
+    renderer.fillRoundedRect(rect.x + 2, rect.y + 2, std::min(std::max(fill, innerH), innerW), innerH, innerH / 2,
+                             Color::Black);
+  }
 }
 
 void drawCover(const GfxRenderer& renderer, const RecentBook& book, const int thumbHeight, const Rect slot,
@@ -184,10 +198,11 @@ void drawCover(const GfxRenderer& renderer, const RecentBook& book, const int th
 }
 
 void drawFeaturedBook(const GfxRenderer& renderer, const RecentBook& book, const int percent, const int thumbHeight,
-                      const Rect rect, const bool selected, const bool percentText) {
+                      const Rect rect, const bool selected, const FeaturedStyle style) {
+  const bool pill = style == FeaturedStyle::Pill;
   const int coverHeight = std::min(thumbHeight, rect.height);
   const int coverWidth = coverHeight * 2 / 3;
-  drawCover(renderer, book, thumbHeight, Rect{rect.x, rect.y, coverWidth, coverHeight});
+  drawCover(renderer, book, thumbHeight, Rect{rect.x, rect.y, coverWidth, coverHeight}, pill ? PILL_COVER_RADIUS : 0);
 
   const int x = rect.x + coverWidth + 20;
   const int w = rect.x + rect.width - x;
@@ -199,8 +214,10 @@ void drawFeaturedBook(const GfxRenderer& renderer, const RecentBook& book, const
   // whatever lines remain above them and ellipsizes past that.
   const int buttonY = rect.y + coverHeight - BUTTON_HEIGHT;
   const int percentY = buttonY - 10 - renderer.getLineHeight(PERCENT_FONT_ID);
-  const int barY = percentText ? percentY - 18 : buttonY - 22;
-  const int textBottom = percent >= 0 ? barY - 12 : buttonY - 12;
+  const int barY = percentY - 18;
+  // The pill row goes 10 below the author and needs a line of its own.
+  const int progressRowH = pill ? 10 + smallHeight + 4 : buttonY - barY + 12;
+  const int textBottom = percent >= 0 ? buttonY - progressRowH : buttonY - 12;
   const bool showAuthor = !book.author.empty() && textBottom - rect.y >= titleHeight + smallHeight + 2;
   const int titleLines =
       std::clamp((textBottom - rect.y - (showAuthor ? smallHeight + 2 : 0)) / std::max(1, titleHeight), 1, 3);
@@ -216,23 +233,33 @@ void drawFeaturedBook(const GfxRenderer& renderer, const RecentBook& book, const
     y += smallHeight + 2;
   }
 
-  if (percent >= 0) {
-    // Without the percent figure the bar sits right under the title and author.
-    drawProgressTrack(renderer, Rect{x, percentText ? barY : y + 12, w, 10}, percent);
-    if (percentText) {
-      char text[8];
-      snprintf(text, sizeof(text), "%d%%", percent);
-      renderer.drawText(PERCENT_FONT_ID, x, percentY, text, true, EpdFontFamily::BOLD);
+  if (percent >= 0 && pill) {
+    // Pill bar right under the title and author, the percent at its end.
+    char text[8];
+    snprintf(text, sizeof(text), "%d%%", percent);
+    const int textW = renderer.getTextWidth(UI_10_FONT_ID, text, EpdFontFamily::BOLD);
+    const int rowY = y + 10;
+    const int trackW = w - textW - 10;
+    if (trackW > 0) {
+      drawProgressTrack(renderer, Rect{x, rowY + (smallHeight - PILL_TRACK_HEIGHT) / 2, trackW, PILL_TRACK_HEIGHT},
+                        percent, true);
     }
+    renderer.drawText(UI_10_FONT_ID, x + w - textW, rowY, text, true, EpdFontFamily::BOLD);
+  } else if (percent >= 0) {
+    drawProgressTrack(renderer, Rect{x, barY, w, 10}, percent);
+    char text[8];
+    snprintf(text, sizeof(text), "%d%%", percent);
+    renderer.drawText(PERCENT_FONT_ID, x, percentY, text, true, EpdFontFamily::BOLD);
   }
 
   // The resume button doubles as the selection indicator: filled when selected.
   const int labelWidth = renderer.getTextWidth(UI_12_FONT_ID, tr(STR_CONTINUE_READING), EpdFontFamily::BOLD);
   const int labelY = buttonY + (BUTTON_HEIGHT - titleHeight) / 2;
+  const int buttonRadius = pill ? BUTTON_HEIGHT / 2 : RADIUS;
   if (selected) {
-    renderer.fillRoundedRect(x, buttonY, w, BUTTON_HEIGHT, RADIUS, Color::Black);
+    renderer.fillRoundedRect(x, buttonY, w, BUTTON_HEIGHT, buttonRadius, Color::Black);
   } else {
-    renderer.drawRoundedRect(x, buttonY, w, BUTTON_HEIGHT, SELECTION_LINE, RADIUS, true);
+    renderer.drawRoundedRect(x, buttonY, w, BUTTON_HEIGHT, SELECTION_LINE, buttonRadius, true);
   }
   renderer.drawText(UI_12_FONT_ID, x + (w - labelWidth) / 2, labelY, tr(STR_CONTINUE_READING), !selected,
                     EpdFontFamily::BOLD);
