@@ -295,6 +295,7 @@ inline std::vector<HomeThemeOption> homeThemeOptions() {
   options.push_back({StrId::STR_THEME_LEDGER, CrossPointSettings::LEDGER});
   options.push_back({StrId::STR_THEME_TODAY, CrossPointSettings::TODAY});
   options.push_back({StrId::STR_THEME_CALENDAR, CrossPointSettings::CALENDAR});
+  options.push_back({StrId::STR_THEME_SHELF, CrossPointSettings::SHELF});
   return options;
 }
 

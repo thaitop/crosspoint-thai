@@ -88,7 +88,7 @@ class GfxRenderer {
     w = x1 - x;
     h = y1 - y;
   }
-  void drawIconScaled(const uint8_t bitmap[], int x, int y, int size, int outSize) const;
+  void drawIconScaled(const uint8_t bitmap[], int x, int y, int size, int outSize, bool black = true) const;
 #if CROSSPOINT_GRAY_UI
   // One physical pixel of a scaled mask at `coverage` / 256: inked from half
   // coverage, and during a gray frame recorded at its real level.
@@ -412,7 +412,8 @@ class GfxRenderer {
   // unlike the other outlines, so a ring can be gray.
   void drawCircle(int x, int y, int diameter, int lineWidth, Color color) const;
   void drawImage(const uint8_t bitmap[], int x, int y, int width, int height) const;
-  void drawIcon(const uint8_t bitmap[], int x, int y, int size) const;
+  // black=false draws the icon's ink white, for icons on a filled background.
+  void drawIcon(const uint8_t bitmap[], int x, int y, int size, bool black = true) const;
 #if CROSSPOINT_HIRES_UI_ICONS
   // Under a UI scale, drawIcon and drawMask draw an icon's hi-res artwork when
   // the table has it. The table must outlive the renderer.

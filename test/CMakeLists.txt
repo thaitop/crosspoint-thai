@@ -79,6 +79,8 @@ add_subdirectory(content_opf_parser)
 add_subdirectory(chapter_position)
 add_subdirectory(book_metadata_cache)
 add_subdirectory(home_button)
+add_subdirectory(shelf_layout)
+add_subdirectory(reading_history)
 add_subdirectory(button_press_navigation)
 
 add_subdirectory(inflate_stream)

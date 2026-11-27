@@ -44,6 +44,8 @@ bool UITheme::hasTodayHome() { return SETTINGS.uiTheme == CrossPointSettings::TO
 
 bool UITheme::hasCalendarHome() { return SETTINGS.uiTheme == CrossPointSettings::CALENDAR; }
 
+bool UITheme::hasShelfHome() { return SETTINGS.uiTheme == CrossPointSettings::SHELF; }
+
 void UITheme::setTheme(CrossPointSettings::UI_THEME type) {
   if (type == CrossPointSettings::COVER_GRID && !supportsCoverGrid()) type = CrossPointSettings::LYRA;
 
@@ -57,8 +59,9 @@ void UITheme::setTheme(CrossPointSettings::UI_THEME type) {
     case CrossPointSettings::UI_THEME::LEDGER:
     case CrossPointSettings::UI_THEME::TODAY:
     case CrossPointSettings::UI_THEME::CALENDAR:
+    case CrossPointSettings::UI_THEME::SHELF:
     case CrossPointSettings::UI_THEME::LYRA: {
-      // Cover Grid, Ledger, Today and Calendar draw their own home; other
+      // Cover Grid, Ledger, Today, Calendar and Shelf draw their own home; other
       // screens retain Lyra styling.
       auto theme = makeUniqueNoThrow<LyraTheme>();
       if (!theme) {

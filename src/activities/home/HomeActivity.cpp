@@ -268,11 +268,15 @@ void HomeActivity::onEnter() {
   } else if (UITheme::hasCalendarHome()) {
     calendarHome = makeUniqueNoThrow<CalendarHome>();
     if (!calendarHome) LOG_ERR("HOME", "OOM: calendar home; using standard home");
+  } else if (UITheme::hasShelfHome()) {
+    shelfHome = makeUniqueNoThrow<ShelfHome>();
+    if (!shelfHome) LOG_ERR("HOME", "OOM: shelf home; using standard home");
   }
   loadRecentBooks(coverGridUi    ? CoverGridHomeUi::MAX_BOOKS
                   : ledgerHome   ? LedgerHome::MAX_BOOKS
                   : todayHome    ? TodayHome::MAX_BOOKS
                   : calendarHome ? CalendarHome::MAX_BOOKS
+                  : shelfHome    ? ShelfHome::maxBooks(renderer)
                                  : metrics.homeRecentBooksCount);
   hasContinueReading = !recentBooks.empty();
   if (hasThemeHome()) resolveGridCoverPaths();
@@ -304,6 +308,7 @@ void HomeActivity::onExit() {
   ledgerHome.reset();
   todayHome.reset();
   calendarHome.reset();
+  shelfHome.reset();
 
   // Free the stored cover buffer if any
   freeCoverBuffer();
@@ -407,6 +412,17 @@ void HomeActivity::loop() {
       return;
     }
   }
+  // Shelf swipes left and right turn the recent row a page; a left-edge back
+  // swipe stays Back, which opens the last book below.
+  if (shelfHome && !mappedInput.wasBackGesture() &&
+      (swipe == MappedInputManager::SwipeDir::Left || swipe == MappedInputManager::SwipeDir::Right)) {
+    const int paged = shelfHome->turnPage(selectorIndex, swipe == MappedInputManager::SwipeDir::Left ? 1 : -1);
+    if (paged >= 0) {
+      selectorIndex = paged;
+      requestUpdate();
+    }
+    return;
+  }
   if (swipe == MappedInputManager::SwipeDir::Up) {
     selectorIndex = ButtonNavigator::nextIndex(selectorIndex, menuCount);
     requestUpdate();
@@ -432,6 +448,7 @@ void HomeActivity::loop() {
     if (mappedInput.wasScreenTapped(x, y)) {
       const int touched = ledgerHome     ? ledgerHome->hitTest(x, y)
                           : calendarHome ? calendarHome->hitTest(x, y)
+                          : shelfHome    ? shelfHome->hitTest(x, y)
                                          : todayHome->hitTest(x, y);
       if (touched >= 0 && touched < menuCount) {
         selectorIndex = touched;
@@ -675,6 +692,7 @@ void HomeActivity::loadThemeHomeCoversAndProgress() {
   for (size_t i = 0; i < recentBooks.size(); ++i) {
     const int height = ledgerHome     ? LedgerHome::coverHeightFor(i)
                        : calendarHome ? CalendarHome::COVER_HEIGHT
+                       : shelfHome    ? ShelfHome::coverHeightFor(renderer, i)
                                       : TodayHome::COVER_HEIGHT;
     loadGridCover(recentBooks[i], height, showingLoading, popupRect);
     if (showingLoading) GUI.fillPopupProgress(renderer, popupRect, (i + 1) * 100 / recentBooks.size());
@@ -683,6 +701,8 @@ void HomeActivity::loadThemeHomeCoversAndProgress() {
     ledgerHome->loadProgress(recentBooks);
   } else if (calendarHome) {
     calendarHome->loadProgress(recentBooks);
+  } else if (shelfHome) {
+    shelfHome->loadProgress(recentBooks);
   } else {
     todayHome->loadProgress();
   }
@@ -705,6 +725,8 @@ void HomeActivity::renderThemeHome() {
     ledgerHome->render(renderer, recentBooks, tools.data(), toolCount, selectorIndex);
   } else if (calendarHome) {
     calendarHome->render(renderer, recentBooks, tools.data(), toolCount, selectorIndex);
+  } else if (shelfHome) {
+    shelfHome->render(renderer, recentBooks, tools.data(), toolCount, selectorIndex);
   } else {
     todayHome->render(renderer, recentBooks, tools.data(), toolCount, selectorIndex);
   }

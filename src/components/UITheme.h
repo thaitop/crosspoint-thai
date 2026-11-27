@@ -47,6 +47,7 @@ class UITheme {
   static bool hasLedgerHome();
   static bool hasTodayHome();
   static bool hasCalendarHome();
+  static bool hasShelfHome();
   void reload();
   void setTheme(CrossPointSettings::UI_THEME type);
   // Thumbs are generated at physical pixels: a logical cover height times the

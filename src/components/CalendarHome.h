@@ -13,7 +13,7 @@ class GfxRenderer;
 // Calendar theme home: a dot-matrix desk clock beside today's reading time
 // as a grid of ten-minute dots, the month as a grid of day discs inked by
 // how long each day was read (tap a day for its minutes), the current book
-// with its resume button, and the tools in a bottom bar.
+// with its resume button, and the tools in a capsule bar at the bottom.
 // Selection indices are flat: the current book (when any), then tools.
 class CalendarHome {
  public:

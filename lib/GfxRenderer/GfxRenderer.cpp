@@ -2102,16 +2102,16 @@ const GfxRenderer::HiResIcon* GfxRenderer::hiResIcon(const uint8_t* bits, const 
 }
 #endif
 
-void GfxRenderer::drawIcon(const uint8_t bitmap[], const int x, const int y, const int size) const {
+void GfxRenderer::drawIcon(const uint8_t bitmap[], const int x, const int y, const int size, const bool black) const {
   if (uiScaleActive_) {
     const PhysicalScope off(*this);
 #if CROSSPOINT_HIRES_UI_ICONS
     if (const HiResIcon* icon = hiResIcon(bitmap, size)) {
-      drawIconScaled(icon->hiRes, sp(x), sp(y), icon->hiResSize, sp(x + size) - sp(x));
+      drawIconScaled(icon->hiRes, sp(x), sp(y), icon->hiResSize, sp(x + size) - sp(x), black);
       return;
     }
 #endif
-    drawIconScaled(bitmap, sp(x), sp(y), size, sp(x + size) - sp(x));
+    drawIconScaled(bitmap, sp(x), sp(y), size, sp(x + size) - sp(x), black);
     return;
   }
   // Plot the icon pixel-by-pixel through drawPixel (which applies the orientation
@@ -2121,7 +2121,7 @@ void GfxRenderer::drawIcon(const uint8_t bitmap[], const int x, const int y, con
   // Icons are square and 1bpp (MSB-first, bit==0 = ink). The (size-1-row, col)
   // mapping reproduces the Portrait orientation the blit produced; drawIcon is
   // only called by the UI themes, which all render in forced Portrait.
-  drawIconScaled(bitmap, x, y, size, size);
+  drawIconScaled(bitmap, x, y, size, size, black);
 }
 
 // Ink of output pixel (dstX, dstY) when a srcW x srcH 1-bit mask is scaled to
@@ -2213,7 +2213,7 @@ void GfxRenderer::drawMask(const uint8_t* bits, const int srcWidth, const int sr
 // drawIcon at outSize x outSize physical pixels, smoothly scaled from the
 // size x size source.
 void GfxRenderer::drawIconScaled(const uint8_t bitmap[], const int x, const int y, const int size,
-                                 const int outSize) const {
+                                 const int outSize, const bool black) const {
   const int rowBytes = (size + 7) / 8;
   const auto inkAt = [&](const int col, const int row) {
     return ((bitmap[row * rowBytes + (col >> 3)] >> (7 - (col & 7))) & 1) == 0;
@@ -2223,11 +2223,11 @@ void GfxRenderer::drawIconScaled(const uint8_t bitmap[], const int x, const int 
 #if CROSSPOINT_GRAY_UI
       const int coverage =
           size == outSize ? (inkAt(col, row) ? 256 : 0) : smoothCoverage(inkAt, size, size, col, row, outSize, outSize);
-      if (coverage > 0) plotCoverage(x + (outSize - 1 - row), y + col, true, coverage);
+      if (coverage > 0) plotCoverage(x + (outSize - 1 - row), y + col, black, coverage);
 #else
       const bool ink = size == outSize ? inkAt(col, row) : smoothInk(inkAt, size, size, col, row, outSize, outSize);
       if (ink) {
-        drawPixel(x + (outSize - 1 - row), y + col, true);
+        drawPixel(x + (outSize - 1 - row), y + col, black);
       }
 #endif
     }
